@@ -1,10 +1,9 @@
 import os
 import sys
-from pathlib import Path
 
-# project_root = Path(__file__).parent.parent.absolute()
-# sys.path.append(str(project_root / "app" / "functions"))
-from app.functions.hello_world import hello_world
+sys.path.append(os.environ["REPOSITORY_HOME"] + "/app/functions")
+import hello_world
+
 
 def test_ok ():
 
