@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Transform: AWS::Serverless-2016-10-31
+
+Description: Sample-App
+
+Globals:
+  Function:
+    Runtime: python3.9
+
+Parameters: 
+  CompanyName:
+    Type: String
+    AllowedValues:
+      - shift
+  ProjectName: 
+    Type: String
+    AllowedValues:
+      - blog
+
+Resources:
+  HelloWorldFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${CompanyName}-${ProjectName}-sample-function
+      Description: Sample-Function
+      CodeUri: ./app/functions
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: 2012-10-17
+          Statement:
+            - Resource: "*"
+              Effect: Allow
+              Action:
+                - lambda:InvokeFunction
+      Handler: hello_world.lambda_handler
+      Events:
+        AppMethod:
+          Type: Api
+          Properties:
+            RestApiId: !Ref HelloWorldAPI
+            Path: /hello_world
+            Method: GET
+      Tags:
+        Name: !Sub ${CompanyName}-${ProjectName}-sample-function
+        CompanyName: !Sub ${CompanyName}
+        ProjectName: !Sub ${ProjectName}
+
+  HelloWorldAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub ${CompanyName}-${ProjectName}-sample-api
+      Description: Sample-API
+      StageName: stg
+      EndpointConfiguration:
+        Type: REGIONAL
+      Tags:
+        Name: !Sub ${CompanyName}-${ProjectName}-sample-api
+        CompanyName: !Sub ${CompanyName}
+        ProjectName: !Sub ${ProjectName}

@@ -1,0 +1,9 @@
+ version = 0.1
+ [sample.deploy.parameters]
+ stack_name = "sample-app-stack"
+ s3_bucket = "echnavi-dashb-api "
+ s3_prefix = "sample-app-stack"
+ region = "ap-northeast-1"
+ confirm_changeset = false
+ capabilities = "CAPABILITY_IAM"
+ fail_on_empty_changeset = false
