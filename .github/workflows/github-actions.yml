@@ -1,0 +1,53 @@
+name: Deploy-AWS-CloudFormation
+ 
+on:
+  push:
+    branches:
+      - 'main'
+  workflow_dispatch:
+ 
+env: 
+  TEMPLATE_FILE: template.yml
+  CONFIG_ENV: sample
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    permissions: 
+      id-token: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Unit-test
+        id: unit-test
+        continue-on-error: true
+        run: |
+          pip install -r requirements.txt -q
+          export REPOSITORY_HOME=$(pwd)
+          cd tests/
+          pytest -v --cov --cov-branch --cov-report=html test_hello_world.py
+          cd ${REPOSITORY_HOME}
+
+      - name: Setup python
+        if: steps.unit-test.outcome == 'success'
+        uses: actions/setup-python@v3
+
+      - name: Setup aws-sam
+        if: steps.unit-test.outcome == 'success'
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS credentials
+        if: steps.unit-test.outcome == 'success'
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ap-northeast-1
+          role-to-assume: arn:aws:iam::487002575802:role/github-cicd-role
+      - run: aws sts get-caller-identity
+
+      - name: Build & Deploy Cloudformation stacks
+        if: steps.unit-test.outcome == 'success'
+        run: |
+          sam build --use-container --config-env ${CONFIG_ENV} --template-file ${TEMPLATE_FILE} --parameter-overrides CompanyName=shift ProjectName=blog
+          sam deploy --config-env ${CONFIG_ENV} --template-file ${TEMPLATE_FILE} --parameter-overrides CompanyName=shift ProjectName=blog
