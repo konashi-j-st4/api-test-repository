@@ -25,10 +25,10 @@ jobs:
 
       - name: Create dependencies layer
         run: |
-          mkdir -p requirements
+          mkdir -p requirements/python
           pip install -r requirements.txt -t requirements/python
           cd requirements
-          zip -r ../requirements.zip .
+          zip -r ../requirements.zip python/
           cd ..
           rm -rf requirements
           mkdir requirements
