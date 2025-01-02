@@ -3,7 +3,7 @@ import sys
 from flask import Flask
 
 sys.path.append(os.environ["REPOSITORY_HOME"] + "/route/dashb/user")
-import dashboard_user_router
+from dashboard_user_router import dashboard_user_router  # Blueprintオブジェクトを直接インポート
 
 # テスト用のFlaskアプリケーション作成
 app = Flask(__name__)
