@@ -23,22 +23,14 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v3
 
-      - name: Create dependencies layer
+      - name: Install dependencies
         run: |
-          mkdir -p requirements/python
-          pip install -r requirements.txt -t requirements/python
-          cd requirements
-          zip -r ../requirements.zip python/
-          cd ..
-          rm -rf requirements
-          mkdir requirements
-          mv requirements.zip requirements/
+          pip install -r requirements.txt
 
       - name: Unit-test
         id: unit-test
         continue-on-error: true
         run: |
-          pip install -r requirements.txt -q
           export REPOSITORY_HOME=$(pwd)
           cd tests/
           pytest -v --cov --cov-branch --cov-report=html test_hello_world.py
