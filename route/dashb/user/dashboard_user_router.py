@@ -9,7 +9,7 @@ def user_home():
         response = {
             'statusCode': 200,
             'body': json.dumps({
-                'message': 'Hello world!'
+                'message': 'Hello world!!'
             })
         }
         return jsonify(response)
