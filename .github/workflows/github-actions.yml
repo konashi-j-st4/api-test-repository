@@ -23,7 +23,12 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v3
 
-      - name: Install dependencies
+      - name: Install dependencies for layer
+        run: |
+          mkdir -p requirements/python
+          pip install -r requirements.txt -t requirements/python
+
+      - name: Install dependencies for test
         run: |
           pip install -r requirements.txt
 
