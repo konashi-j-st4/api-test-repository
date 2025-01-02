@@ -23,13 +23,14 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v3
 
-      - name: Install dependencies for layer
+      - name: Install dependencies
         run: |
-          mkdir -p requirements/python
-          pip install -r requirements.txt -t requirements/python
+          # Lambda関数用の依存関係をapp.pyと同じ階層にインストール
+          pip install -r requirements.txt -t .
 
       - name: Install dependencies for test
         run: |
+          # テスト実行用の依存関係をグローバルにインストール
           pip install -r requirements.txt
 
       - name: Unit-test

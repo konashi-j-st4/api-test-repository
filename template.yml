@@ -30,8 +30,6 @@ Resources:
       FunctionName: !Sub ${CompanyName}-${ProjectName}-api
       CodeUri: .
       Handler: app.lambda_handler
-      Layers:
-        - !Ref DependencyLayer
       Policies:
         - AWSLambdaBasicExecutionRole
       Events:
@@ -45,16 +43,6 @@ Resources:
         Name: !Sub ${CompanyName}-${ProjectName}-api
         CompanyName: !Sub ${CompanyName}
         ProjectName: !Sub ${ProjectName}
-
-  DependencyLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: !Sub ${CompanyName}-${ProjectName}-dependencies
-      Description: Python dependencies for API
-      ContentUri: requirements/
-      CompatibleRuntimes:
-        - python3.9
-      RetentionPolicy: Retain
 
   APIGateway:
     Type: AWS::Serverless::Api
