@@ -7,6 +7,11 @@ Description: Sample-App
 Globals:
   Function:
     Runtime: python3.9
+    Environment:
+      Variables:
+        PYTHONPATH: /var/task
+    Timeout: 29
+    MemorySize: 256
 
 Parameters: 
   CompanyName:
@@ -19,42 +24,46 @@ Parameters:
       - blog
 
 Resources:
-  HelloWorldFunction:
+  APIFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub ${CompanyName}-${ProjectName}-sample-function
-      Description: Sample-Function
-      CodeUri: ./app/functions
+      FunctionName: !Sub ${CompanyName}-${ProjectName}-api
+      CodeUri: .
+      Handler: app.lambda_handler
+      Layers:
+        - !Ref DependencyLayer
       Policies:
         - AWSLambdaBasicExecutionRole
-        - Version: 2012-10-17
-          Statement:
-            - Resource: "*"
-              Effect: Allow
-              Action:
-                - lambda:InvokeFunction
-      Handler: hello_world.lambda_handler
       Events:
-        AppMethod:
+        ApiEvent:
           Type: Api
           Properties:
-            RestApiId: !Ref HelloWorldAPI
-            Path: /hello_world
-            Method: GET
+            RestApiId: !Ref APIGateway
+            Path: /{proxy+}
+            Method: ANY
       Tags:
-        Name: !Sub ${CompanyName}-${ProjectName}-sample-function
+        Name: !Sub ${CompanyName}-${ProjectName}-api
         CompanyName: !Sub ${CompanyName}
         ProjectName: !Sub ${ProjectName}
 
-  HelloWorldAPI:
+  DependencyLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub ${CompanyName}-${ProjectName}-dependencies
+      Description: Python dependencies for API
+      ContentUri: requirements/
+      CompatibleRuntimes:
+        - python3.9
+      RetentionPolicy: Retain
+
+  APIGateway:
     Type: AWS::Serverless::Api
     Properties:
-      Name: !Sub ${CompanyName}-${ProjectName}-sample-api
-      Description: Sample-API
+      Name: !Sub ${CompanyName}-${ProjectName}-api
       StageName: stg
       EndpointConfiguration:
         Type: REGIONAL
       Tags:
-        Name: !Sub ${CompanyName}-${ProjectName}-sample-api
+        Name: !Sub ${CompanyName}-${ProjectName}-api
         CompanyName: !Sub ${CompanyName}
         ProjectName: !Sub ${ProjectName}

@@ -1,14 +1,14 @@
 import os
 import sys
 
-sys.path.append(os.environ["REPOSITORY_HOME"] + "/app/functions")
-import hello_world
+sys.path.append(os.environ["REPOSITORY_HOME"] + "/route/dashb/user")
+import dashboard_user_router
 
 
 def test_ok ():
 
 
-    res = hello_world.lambda_handler(1,2)
+    res = dashboard_user_router.user_home()
 
     status_code = res['statusCode']
     assert status_code == 200
