@@ -3,3 +3,4 @@ aws-wsgi
 pytest
 pytest-cov
 pytest-mock
+PyMySQL==1.1.1
