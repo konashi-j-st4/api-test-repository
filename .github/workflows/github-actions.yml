@@ -56,20 +56,8 @@ jobs:
       - name: Build & Deploy Cloudformation stacks
         if: steps.unit-test.outcome == 'success'
         run: |
-          sam build --use-container --config-env ${CONFIG_ENV} --template-file ${TEMPLATE_FILE} --parameter-overrides \
-            CompanyName=shift \
-            ProjectName=blog \
-            DBUserName=${{ secrets.DB_USER_NAME }} \
-            DBPassword=${{ secrets.DB_PASSWORD }} \
-            DBEndPoint=${{ secrets.DB_END_POINT }} \
-            DBName=${{ secrets.DB_NAME }} \
-            DBPort=${{ secrets.DB_PORT }}
+          sam build --use-container --config-env ${CONFIG_ENV} --template-file ${TEMPLATE_FILE} \
+            --parameter-overrides "CompanyName=shift ProjectName=blog DBUserName=${{ secrets.DB_USER_NAME }} DBPassword=${{ secrets.DB_PASSWORD }} DBEndPoint=${{ secrets.DB_END_POINT }} DBName=${{ secrets.DB_NAME }} DBPort=${{ secrets.DB_PORT }}"
           
-          sam deploy --config-env ${CONFIG_ENV} --template-file ${TEMPLATE_FILE} --parameter-overrides \
-            CompanyName=shift \
-            ProjectName=blog \
-            DBUserName=${{ secrets.DB_USER_NAME }} \
-            DBPassword=${{ secrets.DB_PASSWORD }} \
-            DBEndPoint=${{ secrets.DB_END_POINT }} \
-            DBName=${{ secrets.DB_NAME }} \
-            DBPort=${{ secrets.DB_PORT }}
+          sam deploy --config-env ${CONFIG_ENV} --template-file ${TEMPLATE_FILE} \
+            --parameter-overrides "CompanyName=shift ProjectName=blog DBUserName=${{ secrets.DB_USER_NAME }} DBPassword=${{ secrets.DB_PASSWORD }} DBEndPoint=${{ secrets.DB_END_POINT }} DBName=${{ secrets.DB_NAME }} DBPort=${{ secrets.DB_PORT }}"
