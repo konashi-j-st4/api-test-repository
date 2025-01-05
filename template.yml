@@ -55,6 +55,11 @@ Resources:
     Properties:
       Name: !Sub ${CompanyName}-${ProjectName}-api
       StageName: stg
+      Cors:
+        AllowMethods: "'*'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+        MaxAge: "'600'"
       EndpointConfiguration:
         Type: REGIONAL
       Tags:

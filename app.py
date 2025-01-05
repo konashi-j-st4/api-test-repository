@@ -1,19 +1,20 @@
 import json
 import logging
 from flask import Flask
+from flask_cors import CORS
 from route.router import router
-import awsgi  # aws-wsgiをインポート
+import awsgi
 
 # logger settings
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 app = Flask(__name__)
+CORS(app)
 app.register_blueprint(router)
 
 def lambda_handler(event, context):
     try:
-        # API GatewayのイベントをFlaskで処理できる形に変換
         return awsgi.response(app, event, context)
     except Exception as e:
         logger.error(f"Error: {str(e)}")
