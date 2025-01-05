@@ -59,8 +59,12 @@ jobs:
           sam build --use-container
           
           sam deploy \
-            --stack-name ${STACK_NAME} \
+            --stack-name sample-app-stack \
+            --s3-bucket echnavi-dashb-api \
             --parameter-overrides \
               Environment=stg \
               CompanyName=shift \
-              ProjectName=blog
+              ProjectName=blog \
+            --capabilities CAPABILITY_IAM \
+            --region ap-northeast-1 \
+            --no-fail-on-empty-changeset
