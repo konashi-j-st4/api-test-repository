@@ -22,24 +22,12 @@ Parameters:
     Type: String
     AllowedValues:
       - blog
-  DBUserName:
+  Environment:
     Type: String
-    Description: admin
-    NoEcho: true
-  DBPassword:
-    Type: String
-    Description: sp0e604cpyeU6OqxeTgI
-    NoEcho: true
-  DBEndPoint:
-    Type: String
-    Description: prd-echnavi-instance-2.c6blwgdoxjd7.ap-northeast-1.rds.amazonaws.com
-  DBName:
-    Type: String
-    Description: echnavi_app
-  DBPort:
-    Type: String
-    Description: 3306
-    Default: "3306"
+    AllowedValues:
+      - dev
+      - stg
+      - prd
 
 Resources:
   APIFunction:
@@ -61,13 +49,6 @@ Resources:
         Name: !Sub ${CompanyName}-${ProjectName}-api
         CompanyName: !Sub ${CompanyName}
         ProjectName: !Sub ${ProjectName}
-      Environment:
-        Variables:
-          USER_NAME: !Ref DBUserName
-          PASSWORD: !Ref DBPassword
-          END_POINT: !Ref DBEndPoint
-          DB_NAME: !Ref DBName
-          PORT: !Ref DBPort
 
   APIGateway:
     Type: AWS::Serverless::Api
