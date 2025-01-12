@@ -2,8 +2,8 @@ import os
 import sys
 from flask import Flask
 
-sys.path.append(os.environ["REPOSITORY_HOME"] + "/route/dashb")
-from hello_world_router import hello_world_router
+sys.path.append(os.environ["REPOSITORY_HOME"])
+from route.dashb.hello_world import hello_world_router
 
 # テスト用のFlaskアプリケーション作成
 app = Flask(__name__)
