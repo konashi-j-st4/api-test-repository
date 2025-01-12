@@ -5,7 +5,7 @@ from flask import Blueprint
 
 
 
-from .dashb.user.dashboard_user_router import dashboard_user_router
+from .dashb.hello_world import hello_world_router
 # from .dashb.notification.dashboard_notification_router import dashboard_notification_router
 from .dashb.admin.admin_user_login_router import admin_user_login_router
 from .dashb.admin.agency_get_companies_router import agency_get_companies_router
@@ -25,7 +25,7 @@ router = Blueprint('router', __name__)
 # router.register_blueprint(app_receipt_router, url_prefix='/app')
 
 
-router.register_blueprint(dashboard_user_router, url_prefix='/dashb')
+router.register_blueprint(hello_world_router, url_prefix='/dashb')
 # router.register_blueprint(dashboard_notification_router, url_prefix='/dashb')
 router.register_blueprint(admin_user_login_router, url_prefix='/dashb/admin')
 router.register_blueprint(agency_get_companies_router, url_prefix='/dashb/admin')

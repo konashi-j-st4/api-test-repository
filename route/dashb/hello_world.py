@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify
 import json
 
-dashboard_user_router = Blueprint('dashboard_user', __name__)
+hello_world_router = Blueprint('hello_world', __name__)
 
-@dashboard_user_router.route('/user', methods=['GET'])
+@hello_world_router.route('/hello_world', methods=['GET'])
 def user_home():
     try:
         response = {
