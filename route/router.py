@@ -7,7 +7,8 @@ from flask import Blueprint
 
 from .dashb.user.dashboard_user_router import dashboard_user_router
 # from .dashb.notification.dashboard_notification_router import dashboard_notification_router
-from .dashb.admin.admin_user_router import admin_user_router
+from .dashb.admin.admin_user_login_router import admin_user_login_router
+from .dashb.admin.agency_get_companies_router import agency_get_companies_router
 
 # 統合されたBlueprintの作成
 router = Blueprint('router', __name__)
@@ -26,4 +27,5 @@ router = Blueprint('router', __name__)
 
 router.register_blueprint(dashboard_user_router, url_prefix='/dashb')
 # router.register_blueprint(dashboard_notification_router, url_prefix='/dashb')
-router.register_blueprint(admin_user_router, url_prefix='/dashb/admin')
+router.register_blueprint(admin_user_login_router, url_prefix='/dashb/admin')
+router.register_blueprint(agency_get_companies_router, url_prefix='/dashb/admin')

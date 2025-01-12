@@ -1,5 +1,4 @@
 from flask import Blueprint, jsonify, request
-import json
 import logging
 import pymysql
 import os
@@ -8,10 +7,10 @@ import os
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-admin_user_router = Blueprint('admin_user', __name__)
+agency_get_companies_router = Blueprint('agency_get_companies', __name__)
 
-@admin_user_router.route('/login', methods=['POST'])
-def admin_login():
+@agency_get_companies_router.route('/agency_get_companies', methods=['POST'])
+def agency_get_companies():
     # エラーレスポンスは予め作成
     err_res = {
         "resultCode": "error",
@@ -19,89 +18,69 @@ def admin_login():
     }
 
     try:
-        # リクエストボディから情報を取得
-        body = request.get_json()
-        logger.info('body表示')
-        logger.info(body)
-        
-        if 'userId' in body and 'password' in body:
-            userId = body['userId']
-            password = body['password']
-        else:
-            raise ValueError("userId or password is missing in the request body")
-            
         # MySQLへの接続情報
         db_user_name = os.environ['USER_NAME']
         db_password = os.environ['PASSWORD']
         end_point = os.environ['END_POINT']
         db_name = os.environ['DB_NAME']
         port = int(os.environ['PORT'])
-        
     except Exception as e:
-        err_msg = 'Failed to retrieve query parameters or environment variables'
+        err_msg = 'Failed to retrieve environment variables'
         err_res['message'] = err_msg
         err_res['data']['error'] = str(e)
         logger.error(f"{err_msg}:{str(e)}")
-        return jsonify(err_res), 500
+        return (err_res, 500)
 
     # MySQLに接続
     try:
-        conn = pymysql.connect(
-            host=end_point,
-            user=db_user_name,
-            passwd=db_password,
-            db=db_name,
-            port=port,
-            connect_timeout=60
-        )
+        conn = pymysql.connect(host=end_point, user=db_user_name,
+                               passwd=db_password, db=db_name, port=port, connect_timeout=60)
         logger.info("MySQL instance successfully connected to Database.")
-        
     except Exception as e:
         err_msg = "MySQL instance failed to connect to Database."
         err_res['message'] = err_msg
         err_res['data']['error'] = str(e)
         logger.error(f"{err_msg}:{str(e)}")
-        return jsonify(err_res), 500
+        return (err_res, 500)
 
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-            user_query = """
-            SELECT a.user_id 
-            FROM m_user a
-            INNER JOIN m_user_admin b ON a.user_id = b.user_id
-            WHERE a.user_id = %s
-            AND b.password = %s
-            AND a.user_category = 3;
+            # 実行クエリ
+            agency_query = """
+            SELECT agency_id, app_agency_number, company, zip_code, prefecture, 
+                   city, address, building, country, telephone, status
+            FROM m_agency
             """
-            cursor.execute(user_query, (userId, password))
+            cursor.execute(agency_query)
             result = cursor.fetchall()
-            logger.info(user_query)
+            logger.info(agency_query)
             logger.info(result)
-            
+
             if result:
                 res = {
                     "resultCode": "success",
-                    "message": "You can reset your password.",
+                    "message": "All agencies retrieved successfully.",
                     "data": result
                 }
-                return jsonify(res), 200
+                return (res, 200)
             else:
                 res = {
                     "resultCode": "success",
-                    "message": "User does not exist.[E001]",
-                    "data": ""
+                    "message": "No agencies found.[E002]",
+                    "data": []
                 }
-                return jsonify(res), 200
+                return (res, 200)
 
     except Exception as e:
+        # エラーロギング
         logger.error(f"An error occurred: {str(e)}")
-        err_msg = 'err.'
+        err_msg = 'Error occurred while fetching agencies.'
         detail_err_msg = 'An error occurred while executing the query.'
         err_res['message'] = err_msg
         err_res['data']['error'] = detail_err_msg
-        logger.error(f"{err_msg}:{detail_err_msg}")
-        return jsonify(err_res), 500
-        
+        logger.error(f"{err_msg}:{detail_err_msg}")            
+        return (err_res, 500)
+
     finally:
         if 'conn' in locals() and conn.open:
             conn.close()
