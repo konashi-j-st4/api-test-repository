@@ -14,7 +14,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # Cognito設定
-USER_POOL_ID = os.environ['USER_POOL_ID']
+COGNITO_USER_POOL_ID = os.environ['COGNITO_USER_POOL_ID']
 
 # Cognitoクライアントの初期化
 cognito_client = boto3.client('cognito-idp')
@@ -59,7 +59,7 @@ def generate_ech_nav_code(cursor, agency_id):
 def register_cognito_user(email, phone, lastName, firstName, ech_nav_code):
     try:
         formatted_phone = format_phone_number(phone)
-        user_pool_id = os.environ['USER_POOL_ID']
+        user_pool_id = os.environ['COGNITO_USER_POOL_ID']
         
         response = cognito_client.admin_create_user(
             UserPoolId=user_pool_id,
@@ -78,7 +78,7 @@ def register_cognito_user(email, phone, lastName, firstName, ech_nav_code):
         )
 
         cognito_client.admin_set_user_settings(
-            UserPoolId=USER_POOL_ID,
+            UserPoolId=COGNITO_USER_POOL_ID,
             Username=formatted_phone,
             MFAOptions=[
                 {

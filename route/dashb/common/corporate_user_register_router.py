@@ -17,7 +17,7 @@ db_name = os.environ['DB_NAME']
 port = int(os.environ['PORT'])
 
 # Cognito設定
-USER_POOL_ID = os.environ['USER_POOL_ID']
+COGNITO_USER_POOL_ID = os.environ['COGNITO_USER_POOL_ID']
 
 # ロガー設定
 logger = logging.getLogger()
@@ -71,7 +71,7 @@ def register_cognito_user(email, phone, lastName, firstName, ech_nav_code):
     try:
         formatted_phone = format_phone_number(phone)
         response = cognito_client.admin_create_user(
-            UserPoolId=USER_POOL_ID,
+            UserPoolId=COGNITO_USER_POOL_ID,
             Username=formatted_phone,
             UserAttributes=[
                 {'Name': 'email', 'Value': email},
@@ -87,7 +87,7 @@ def register_cognito_user(email, phone, lastName, firstName, ech_nav_code):
         )
         # MFAを有効にし、SMSを必須に設定
         cognito_client.admin_set_user_settings(
-            UserPoolId=USER_POOL_ID,
+            UserPoolId=COGNITO_USER_POOL_ID,
             Username=formatted_phone,
             MFAOptions=[
                 {
