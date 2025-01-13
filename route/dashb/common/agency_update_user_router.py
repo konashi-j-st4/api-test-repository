@@ -33,7 +33,7 @@ def agency_update_user():
             )), 400
 
         # パラメータの取得
-        user_id = data['user_id']
+        app_user_number = data['user_id']
         lastname = data['lastname']
         firstname = data['firstname']
         status = data['status']
@@ -52,6 +52,17 @@ def agency_update_user():
 
         try:
             with conn.cursor() as cursor:
+                # app_user_numberからuser_idを取得
+                user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                cursor.execute(user_id_query, (app_user_number,))
+                result = cursor.fetchone()
+                if not result:
+                    return jsonify(create_error_response(
+                        "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                        None
+                    )), 404
+                user_id = result[0]
+                
                 # 現在時刻を取得
                 now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 
@@ -125,7 +136,7 @@ def agency_update_user():
                 return jsonify(create_success_response(
                     "ユーザー情報の更新に成功しました",
                     {
-                        "user_id": user_id,
+                        "user_id": app_user_number,
                         "lastname": lastname,
                         "firstname": firstname
                     }

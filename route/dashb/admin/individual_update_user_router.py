@@ -24,7 +24,7 @@ def individual_update_user():
             if field not in data:
                 raise ValueError(f"Missing required field: {field}")
         
-        user_id = data['user_id']
+        app_user_number = data['user_id']
         status = data['status']
 
         # MySQLに接続
@@ -39,6 +39,15 @@ def individual_update_user():
         logger.info("MySQL instance successfully connected to Database.")
 
         with conn.cursor() as cursor:
+            
+            # app_user_numberからuser_idを取得
+            user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+            cursor.execute(user_id_query, (app_user_number,))
+            result = cursor.fetchone()
+            if not result:
+                raise ValueError("Failed to retrieve the inserted user_id")
+            user_id = result[0]
+            
             now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             # m_user テーブルの更新
             update_user_query = """

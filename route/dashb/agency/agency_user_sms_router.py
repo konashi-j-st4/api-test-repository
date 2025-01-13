@@ -146,7 +146,7 @@ def agency_user_sms():
             if function_type == 0:
                 # 初回認証時の処理
                 with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                    user_query = "SELECT user_id FROM m_user WHERE echnavicode = %s;"
+                    user_query = "SELECT app_user_number FROM m_user WHERE echnavicode = %s;"
                     cursor.execute(user_query, (ech_navi_code,))
                     result = cursor.fetchone()
                     
@@ -156,7 +156,7 @@ def agency_user_sms():
                         None
                     )), 404
 
-                user_id = result['user_id']
+                app_user_number = result['app_user_number']
 
                 try:
                     # ユーザー情報の取得
@@ -252,7 +252,7 @@ def agency_user_sms():
             elif function_type == 1:
                 # SMS認証時の処理
                 with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                    user_query = "SELECT user_id FROM m_user WHERE echnavicode = %s;"
+                    user_query = "SELECT app_user_number FROM m_user WHERE echnavicode = %s;"
                     cursor.execute(user_query, (ech_navi_code,))
                     result = cursor.fetchone()
                     
@@ -262,7 +262,7 @@ def agency_user_sms():
                         None
                     )), 404
                 
-                user_id = result['user_id']
+                app_user_number = result['app_user_number']
 
                 try:
                     # SMS MFA チャレンジに応答
@@ -295,7 +295,7 @@ def agency_user_sms():
                         
                         return jsonify(create_success_response(
                             "認証が完了しました",
-                            {"user_id": user_id}
+                            {"user_id": app_user_number}
                         )), 200
                     else:
                         return jsonify(create_error_response(

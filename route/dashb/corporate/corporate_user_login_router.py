@@ -133,7 +133,7 @@ def corporate_user_login():
         try:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 user_query = """
-                SELECT user_id 
+                SELECT app_user_number 
                 FROM m_user
                 WHERE echnavicode = %s
                 AND user_category = 2;
@@ -144,7 +144,7 @@ def corporate_user_login():
                 if result:
                     return jsonify(create_success_response(
                         "ログインに成功しました",
-                        {"user_id": result['user_id']}
+                        {"user_id": result['app_user_number']}
                     )), 200
                 else:
                     return jsonify(create_error_response(

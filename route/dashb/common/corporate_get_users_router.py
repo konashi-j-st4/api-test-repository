@@ -23,10 +23,10 @@ def corporate_get_users():
             )), 400
 
         # パラメータの取得
-        user_id = data.get('userId')
+        app_user_number = data.get('userId')
         get_all_flg = data.get('getAllFlg', 0)  # デフォルト値は0
 
-        if not user_id and get_all_flg != 1:
+        if not app_user_number and get_all_flg != 1:
             return jsonify(create_error_response(
                 "userIdは必須です（getAllFlgが1の場合を除く）",
                 None
@@ -59,6 +59,17 @@ def corporate_get_users():
                     """
                     cursor.execute(user_query)
                 else:
+                    # app_user_numberからuser_idを取得
+                    user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                    cursor.execute(user_id_query, (app_user_number,))
+                    result = cursor.fetchone()
+                    if not result:
+                        return jsonify(create_error_response(
+                            "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                            None
+                        )), 404
+                    user_id = result[0]
+                    
                     # getAllFlgが1以外の場合、ユーザーIDに基づいて取得
                     user_query = """
                     SELECT a.user_id, a.app_user_number, a.lastname, a.firstname, a.status, b.permission 

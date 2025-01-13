@@ -105,7 +105,7 @@ def get_corporate_id(cursor, user_id):
     cursor.execute("SELECT corporate_id FROM m_user_corporate WHERE user_id = %s", (user_id,))
     result = cursor.fetchone()
     if not result:
-        raise ValueError(f"指定されたuser_id: {user_id}に対応するcorporate_idが見つかりません")
+        raise ValueError(f"corporate_idが見つかりません")
     return result[0]
 
 corporate_user_register_router = Blueprint('corporate_user_register', __name__)
@@ -123,7 +123,7 @@ def corporate_user_register():
             )), 400
 
         # 必須パラメータの取得
-        user_id = data.get('userId')
+        app_user_number = data.get('userId')
         corporate_id = data.get('corporateId')
         lastName = data.get('lastName')
         firstName = data.get('firstName')
@@ -131,7 +131,7 @@ def corporate_user_register():
         phone = data.get('phone')
 
         # パラメータのバリデーション
-        if not (user_id or corporate_id):
+        if not (app_user_number or corporate_id):
             return jsonify(create_error_response(
                 "userIdまたはcorporateIdのいずれかが必要です",
                 None
@@ -156,6 +156,17 @@ def corporate_user_register():
 
         try:
             with conn.cursor() as cursor:
+                # app_user_numberからuser_idを取得
+                user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                cursor.execute(user_id_query, (app_user_number,))
+                result = cursor.fetchone()
+                if not result:
+                    return jsonify(create_error_response(
+                        "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                        None
+                    )), 404
+                user_id = result[0]
+                
                 # トランザクション開始
                 conn.begin()
 
@@ -203,7 +214,6 @@ def corporate_user_register():
                 return jsonify(create_success_response(
                     "ユーザー登録が完了しました",
                     {
-                        "user_id": user_id_new,
                         "app_user_number": app_user_number,
                         "cognito_username": cognito_username,
                         "ech_nav_code": ech_nav_code

@@ -52,9 +52,9 @@ def get_stations():
                 None
             )), 400
 
-        user_id = data['userId']
+        app_user_number = data['userId']
         status = data['status']
-        logger.info(f"Received userId: {user_id}, status: {status}")
+        logger.info(f"Received app_user_number: {app_user_number}, status: {status}")
 
         # MySQLに接続
         conn = pymysql.connect(
@@ -68,6 +68,17 @@ def get_stations():
         logger.info("データベースへの接続に成功しました")
 
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # app_user_numberからuser_idを取得
+            user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+            cursor.execute(user_id_query, (app_user_number,))
+            result = cursor.fetchone()
+            if not result:
+                return jsonify(create_error_response(
+                    "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                    None
+                )), 404
+            user_id = result[0]
+            
             # 実行クエリ
             user_query = """
             SELECT 

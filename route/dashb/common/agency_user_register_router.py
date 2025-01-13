@@ -109,7 +109,7 @@ def agency_user_register():
             )), 400
 
         # パラメータの取得
-        user_id = data.get('userId')
+        app_user_number = data.get('userId')
         agency_id = data.get('agencyId')
         lastName = data.get('lastName')
         firstName = data.get('firstName')
@@ -118,7 +118,7 @@ def agency_user_register():
         permission = data.get('permission')
 
         # バリデーション
-        if not (user_id or agency_id):
+        if not (app_user_number or agency_id):
             return jsonify(create_error_response(
                 "userIdまたはagencyIdのいずれかが必要です",
                 None
@@ -143,6 +143,17 @@ def agency_user_register():
 
         try:
             with conn.cursor() as cursor:
+                # app_user_numberからuser_idを取得
+                user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                cursor.execute(user_id_query, (app_user_number,))
+                result = cursor.fetchone()
+                if not result:
+                    return jsonify(create_error_response(
+                        "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                        None
+                    )), 404
+                user_id = result[0]
+                
                 # トランザクション開始
                 conn.begin()
 
@@ -197,7 +208,6 @@ def agency_user_register():
                 return jsonify(create_success_response(
                     "ユーザー情報の登録に成功しました",
                     {
-                        "user_id": user_id_new,
                         "app_user_number": app_user_number,
                         "cognito_username": cognito_username,
                         "ech_nav_code": ech_nav_code

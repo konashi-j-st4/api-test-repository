@@ -43,8 +43,8 @@ def get_powersupplies():
             )), 400
 
         location_id = data['location_id']
-        user_id = data['user_id']
-        logger.info(f"Received location_id: {location_id}, user_id: {user_id}")
+        app_user_number = data['user_id']
+        logger.info(f"Received location_id: {location_id}, app_user_number: {app_user_number}")
 
         # MySQLに接続
         conn = pymysql.connect(
@@ -58,6 +58,17 @@ def get_powersupplies():
         logger.info("データベースへの接続に成功しました")
 
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+            # app_user_numberからuser_idを取得
+            user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+            cursor.execute(user_id_query, (app_user_number,))
+            result = cursor.fetchone()
+            if not result:
+                return jsonify(create_error_response(
+                    "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                    None
+                )), 404
+            user_id = result[0]
+            
             # ユーザー権限の取得
             user_permission_query = "SELECT permission FROM m_user_agency WHERE user_id = %s"
             cursor.execute(user_permission_query, (user_id,))
@@ -65,7 +76,7 @@ def get_powersupplies():
             
             if not user_permission_result:
                 return jsonify(create_error_response(
-                    f"ユーザーID {user_id} の権限が見つかりません",
+                    f"ユーザーID {app_user_number} の権限が見つかりません",
                     None
                 )), 404
             

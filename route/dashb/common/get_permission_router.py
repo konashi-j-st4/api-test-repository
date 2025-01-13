@@ -23,7 +23,7 @@ def get_permission():
             )), 400
 
         # パラメータの取得
-        user_id = data.get('userId')
+        app_user_number = data.get('userId')
         user_category = data.get('userCategory')
 
         # MySQLに接続
@@ -46,8 +46,17 @@ def get_permission():
 
                 if user_category == 4:
                     where_clause = "WHERE permission_id BETWEEN 2 AND 7"
-                elif user_id:
+                elif app_user_number:
                     # user_idが指定されている場合、m_user_agencyからpermissionを取得
+                    user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                    cursor.execute(user_id_query, (app_user_number,))
+                    result = cursor.fetchone()
+                    if not result:
+                        return jsonify(create_error_response(
+                            "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                            None
+                        )), 404
+                    user_id = result[0]
                     user_permission_query = """
                     SELECT permission FROM m_user_agency WHERE user_id = %s;
                     """

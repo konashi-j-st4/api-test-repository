@@ -31,7 +31,7 @@ def get_charge_history():
 
         start_period = data['start_period']
         end_period = data['end_period']
-        user_id = data.get('user_id')
+        app_user_number = data.get('user_id')
         powersupply_ids = data.get('powersupply_ids')
 
         # MySQLに接続
@@ -47,6 +47,17 @@ def get_charge_history():
 
         try:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                # app_user_numberからuser_idを取得
+                user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                cursor.execute(user_id_query, (app_user_number,))
+                result = cursor.fetchone()
+                if not result:
+                    return jsonify(create_error_response(
+                        "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                        None
+                    )), 404
+                user_id = result[0]
+                
                 # user_idが存在し、powersupply_idsが未指定の場合にのみクエリを実行
                 if user_id and not powersupply_ids:
                     # まずユーザーの権限レベルを取得
@@ -60,7 +71,7 @@ def get_charge_history():
                     
                     if not permission_result:
                         return jsonify(create_error_response(
-                            f"ユーザーID {user_id} の権限が見つかりません",
+                            f"ユーザーID {app_user_number} の権限が見つかりません",
                             None
                         )), 404
                     

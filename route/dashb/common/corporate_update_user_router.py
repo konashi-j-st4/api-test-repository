@@ -31,7 +31,7 @@ def corporate_update_user():
                     None
                 )), 400
 
-        user_id = data['user_id']
+        app_user_number = data['user_id']
         lastname = data['lastname']
         firstname = data['firstname']
         status = data['status']
@@ -50,6 +50,17 @@ def corporate_update_user():
 
         try:
             with conn.cursor() as cursor:
+                # app_user_numberからuser_idを取得
+                user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                cursor.execute(user_id_query, (app_user_number,))
+                result = cursor.fetchone()
+                if not result:
+                    return jsonify(create_error_response(
+                        "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                        None
+                    )), 404
+                user_id = result[0]
+                
                 # m_user テーブルの更新
                 update_user_query = """
                 UPDATE m_user

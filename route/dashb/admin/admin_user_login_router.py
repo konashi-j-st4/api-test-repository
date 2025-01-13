@@ -55,7 +55,7 @@ def admin_user_login():
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
             user_query = """
-            SELECT a.user_id 
+            SELECT a.app_user_number 
             FROM m_user a
             INNER JOIN m_user_admin b ON a.user_id = b.user_id
             WHERE a.user_id = %s
@@ -70,7 +70,7 @@ def admin_user_login():
             if result:
                 return jsonify(create_success_response(
                     "You can reset your password.",
-                    result
+                    result[0]
                 )), 200
             else:
                 return jsonify(create_success_response(

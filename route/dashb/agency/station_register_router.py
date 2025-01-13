@@ -68,7 +68,7 @@ def station_register():
             )), 400
 
         # パラメータの取得
-        user_id = data['user_id']
+        app_user_number = data['user_id']
         station_name = data['station_name']
         zip_code = data['zip_code']
         prefecture = data['prefecture']
@@ -93,6 +93,17 @@ def station_register():
 
         try:
             with conn.cursor() as cursor:
+                # app_user_numberからuser_idを取得
+                user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                cursor.execute(user_id_query, (app_user_number,))
+                result = cursor.fetchone()
+                if not result:
+                    return jsonify(create_error_response(
+                        "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                        None
+                    )), 404
+                user_id = result[0]
+                
                 # ユーザーに対応する企業IDを取得
                 user_query = 'SELECT agency_id FROM m_user_agency WHERE user_id = %s'
                 cursor.execute(user_query, (user_id,))
@@ -100,7 +111,7 @@ def station_register():
                 
                 if not result:
                     return jsonify(create_error_response(
-                        f"ユーザーID {user_id} に対応する企業IDが見つかりません",
+                        f"ユーザーID {app_user_number} に対応する企業IDが見つかりません",
                         None
                     )), 404
 

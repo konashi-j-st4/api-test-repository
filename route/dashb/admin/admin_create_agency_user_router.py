@@ -18,7 +18,7 @@ def admin_create_agency_user():
         if 'user_id' not in body or 'agency_id' not in body:
             raise ValueError("user_id and agency_id are required in the request body")
             
-        user_id = body['user_id']
+        app_user_number = body['user_id']
         agency_id = body['agency_id']
         
         # MySQLへの接続情報
@@ -50,6 +50,18 @@ def admin_create_agency_user():
 
     try:
         with conn.cursor() as cursor:
+            # app_user_numberからuser_idを取得
+            user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+            cursor.execute(user_id_query, (app_user_number,))
+            result = cursor.fetchone()
+                
+            if not result:
+                return jsonify(create_error_response(
+                    "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                    None
+                )), 404
+            user_id = result[0]
+            
             # レコードの存在確認
             check_query = "SELECT * FROM m_user_agency WHERE user_id = %s"
             cursor.execute(check_query, (user_id,))

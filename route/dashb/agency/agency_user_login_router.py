@@ -125,7 +125,7 @@ def agency_user_login():
 
                 with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                     user_query = """
-                    SELECT user_id 
+                    SELECT app_user_number 
                     FROM m_user
                     WHERE echnavicode = %s
                     AND user_category = 4;
@@ -137,7 +137,7 @@ def agency_user_login():
                         return jsonify(create_success_response(
                             "ログインに成功しました",
                             {
-                                "user_id": result['user_id'],
+                                "user_id": result['app_user_number'],
                                 "accessToken": auth_response['AuthenticationResult']['AccessToken']
                             }
                         )), 200

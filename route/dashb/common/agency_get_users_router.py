@@ -23,7 +23,7 @@ def agency_get_users():
             )), 400
 
         # パラメータの取得
-        user_id = data.get('userId')
+        app_user_number = data.get('userId')
         get_all_flg = data.get('getAllFlg')
         get_company_users_flg = data.get('getCompanyUsersFlg')
 
@@ -40,6 +40,17 @@ def agency_get_users():
 
         try:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                # app_user_numberからuser_idを取得
+                user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                cursor.execute(user_id_query, (app_user_number,))
+                result = cursor.fetchone()
+                if not result:
+                    return jsonify(create_error_response(
+                        "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                        None
+                    )), 404
+                user_id = result[0]
+                
                 if get_all_flg == 1:
                     # getAllFlgが1の場合のクエリ
                     user_query = """
