@@ -5,3 +5,6 @@ pytest-cov
 pytest-mock
 PyMySQL==1.1.1
 flask-cors
+boto3
+botocore
+re

@@ -16,8 +16,6 @@ def admin_user_login():
     try:
         # リクエストボディから情報を取得
         body = request.get_json()
-        logger.info('body表示')
-        logger.info(body)
         
         if 'userId' in body and 'password' in body:
             userId = body['userId']
