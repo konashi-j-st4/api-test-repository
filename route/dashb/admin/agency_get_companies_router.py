@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 import logging
 import pymysql
 import os
+from response.response_base import create_success_response, create_error_response
 
 # logger settings
 logger = logging.getLogger()
@@ -11,12 +12,6 @@ agency_get_companies_router = Blueprint('agency_get_companies', __name__)
 
 @agency_get_companies_router.route('/agency_get_companies', methods=['POST'])
 def agency_get_companies():
-    # エラーレスポンスは予め作成
-    err_res = {
-        "resultCode": "error",
-        "data": {}
-    }
-
     try:
         # MySQLへの接続情報
         db_user_name = os.environ['USER_NAME']
@@ -26,10 +21,8 @@ def agency_get_companies():
         port = int(os.environ['PORT'])
     except Exception as e:
         err_msg = 'Failed to retrieve environment variables'
-        err_res['message'] = err_msg
-        err_res['data']['error'] = str(e)
         logger.error(f"{err_msg}:{str(e)}")
-        return (err_res, 500)
+        return jsonify(create_error_response(err_msg, str(e))), 500
 
     # MySQLに接続
     try:
@@ -38,10 +31,8 @@ def agency_get_companies():
         logger.info("MySQL instance successfully connected to Database.")
     except Exception as e:
         err_msg = "MySQL instance failed to connect to Database."
-        err_res['message'] = err_msg
-        err_res['data']['error'] = str(e)
         logger.error(f"{err_msg}:{str(e)}")
-        return (err_res, 500)
+        return jsonify(create_error_response(err_msg, str(e))), 500
 
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
@@ -57,29 +48,23 @@ def agency_get_companies():
             logger.info(result)
 
             if result:
-                res = {
-                    "resultCode": "success",
-                    "message": "All agencies retrieved successfully.",
-                    "data": result
-                }
-                return (res, 200)
+                return jsonify(create_success_response(
+                    "All agencies retrieved successfully.",
+                    result
+                )), 200
             else:
-                res = {
-                    "resultCode": "success",
-                    "message": "No agencies found.[E002]",
-                    "data": []
-                }
-                return (res, 200)
+                return jsonify(create_success_response(
+                    "No agencies found.[E002]",
+                    []
+                )), 200
 
     except Exception as e:
         # エラーロギング
         logger.error(f"An error occurred: {str(e)}")
         err_msg = 'Error occurred while fetching agencies.'
         detail_err_msg = 'An error occurred while executing the query.'
-        err_res['message'] = err_msg
-        err_res['data']['error'] = detail_err_msg
         logger.error(f"{err_msg}:{detail_err_msg}")            
-        return (err_res, 500)
+        return jsonify(create_error_response(err_msg, detail_err_msg)), 500
 
     finally:
         if 'conn' in locals() and conn.open:

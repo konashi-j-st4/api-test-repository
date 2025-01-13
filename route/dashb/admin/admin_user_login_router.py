@@ -3,6 +3,7 @@ import json
 import logging
 import pymysql
 import os
+from response.response_base import create_success_response, create_error_response
 
 # logger settings
 logger = logging.getLogger()
@@ -12,12 +13,6 @@ admin_user_login_router = Blueprint('admin_user_login', __name__)
 
 @admin_user_login_router.route('/admin_user_login', methods=['POST'])
 def admin_user_login():
-    # エラーレスポンスは予め作成
-    err_res = {
-        "resultCode": "error",
-        "data": {}
-    }
-
     try:
         # リクエストボディから情報を取得
         body = request.get_json()
@@ -39,10 +34,8 @@ def admin_user_login():
         
     except Exception as e:
         err_msg = 'Failed to retrieve query parameters or environment variables'
-        err_res['message'] = err_msg
-        err_res['data']['error'] = str(e)
         logger.error(f"{err_msg}:{str(e)}")
-        return jsonify(err_res), 500
+        return jsonify(create_error_response(err_msg, str(e))), 500
 
     # MySQLに接続
     try:
@@ -58,10 +51,8 @@ def admin_user_login():
         
     except Exception as e:
         err_msg = "MySQL instance failed to connect to Database."
-        err_res['message'] = err_msg
-        err_res['data']['error'] = str(e)
         logger.error(f"{err_msg}:{str(e)}")
-        return jsonify(err_res), 500
+        return jsonify(create_error_response(err_msg, str(e))), 500
 
     try:
         with conn.cursor(pymysql.cursors.DictCursor) as cursor:
@@ -79,28 +70,22 @@ def admin_user_login():
             logger.info(result)
             
             if result:
-                res = {
-                    "resultCode": "success",
-                    "message": "You can reset your password.",
-                    "data": result
-                }
-                return jsonify(res), 200
+                return jsonify(create_success_response(
+                    "You can reset your password.",
+                    result
+                )), 200
             else:
-                res = {
-                    "resultCode": "success",
-                    "message": "User does not exist.[E001]",
-                    "data": ""
-                }
-                return jsonify(res), 200
+                return jsonify(create_success_response(
+                    "User does not exist.[E001]",
+                    ""
+                )), 200
 
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
         err_msg = 'err.'
         detail_err_msg = 'An error occurred while executing the query.'
-        err_res['message'] = err_msg
-        err_res['data']['error'] = detail_err_msg
         logger.error(f"{err_msg}:{detail_err_msg}")
-        return jsonify(err_res), 500
+        return jsonify(create_error_response(err_msg, detail_err_msg)), 500
         
     finally:
         if 'conn' in locals() and conn.open:
