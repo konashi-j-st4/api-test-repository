@@ -73,7 +73,7 @@ def agency_update_user():
                 SET permission = %s
                 WHERE user_id = %s;
                 """
-                cursor.execute(update_user_agency_query, (permission, now, 'Dashboard', user_id))
+                cursor.execute(update_user_agency_query, (permission, user_id))
 
                 # statusが3の場合、Cognitoのアカウントを削除
                 if status == 3:
