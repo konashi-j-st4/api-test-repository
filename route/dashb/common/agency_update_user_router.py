@@ -70,9 +70,7 @@ def agency_update_user():
                 # m_user_agency テーブルの更新
                 update_user_agency_query = """
                 UPDATE m_user_agency
-                SET permission = %s,
-                    update_date = %s,
-                    update_user = %s
+                SET permission = %s
                 WHERE user_id = %s;
                 """
                 cursor.execute(update_user_agency_query, (permission, now, 'Dashboard', user_id))
