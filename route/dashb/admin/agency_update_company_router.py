@@ -3,6 +3,7 @@ import logging
 import pymysql
 import os
 from response.response_base import create_success_response, create_error_response
+import datetime
 
 # logger settings
 logger = logging.getLogger()
@@ -48,18 +49,19 @@ def agency_update_company():
         logger.info("MySQL instance successfully connected to Database.")
 
         with conn.cursor() as cursor:
+            now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             # 実行クエリ
             update_query = """
             UPDATE m_agency
             SET app_agency_number = %s, company = %s, zip_code = %s, 
                 prefecture = %s, city = %s, address = %s, building = %s, 
                 country = %s, telephone = %s, status = %s, 
-                update_date = NOW(), update_user = 'API'
+                update_date = %s, update_user = %s
             WHERE agency_id = %s
             """
             cursor.execute(update_query, (
                 app_agency_number, company, zip_code, prefecture, city, 
-                address, building, country, telephone, status, agency_id
+                address, building, country, telephone, status, now, 'Dashboard', agency_id
             ))
             
             # 変更を確定

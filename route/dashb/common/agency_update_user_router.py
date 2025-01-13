@@ -4,7 +4,7 @@ import pymysql
 import os
 from response.response_base import create_success_response, create_error_response
 import boto3
-
+import datetime
 # logger settings
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -52,27 +52,30 @@ def agency_update_user():
 
         try:
             with conn.cursor() as cursor:
+                # 現在時刻を取得
+                now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                
                 # m_user テーブルの更新
                 update_user_query = """
                 UPDATE m_user
                 SET lastname = %s,
                     firstname = %s,
                     status = %s,
-                    update_date = NOW(),
-                    update_user = 'API'
+                    update_date = %s,
+                    update_user = %s
                 WHERE user_id = %s;
                 """
-                cursor.execute(update_user_query, (lastname, firstname, status, user_id))
+                cursor.execute(update_user_query, (lastname, firstname, status, now, 'Dashboard', user_id))
 
                 # m_user_agency テーブルの更新
                 update_user_agency_query = """
                 UPDATE m_user_agency
                 SET permission = %s,
-                    update_date = NOW(),
-                    update_user = 'API'
+                    update_date = %s,
+                    update_user = %s
                 WHERE user_id = %s;
                 """
-                cursor.execute(update_user_agency_query, (permission, user_id))
+                cursor.execute(update_user_agency_query, (permission, now, 'Dashboard', user_id))
 
                 # statusが3の場合、Cognitoのアカウントを削除
                 if status == 3:

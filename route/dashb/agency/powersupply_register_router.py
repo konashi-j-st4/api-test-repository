@@ -88,7 +88,7 @@ def powersupply_register():
                     data['type'], data['wat'], data['price'], data['quick_power'],
                     data['nomal_power'], data['maintenance'], data['online'],
                     data['charge_segment'], data['permission'],
-                    now, 'API', now, 'API', 1
+                    now, 'Dashboard', now, 'Dashboard', 1
                 ))
                 conn.commit()
                 

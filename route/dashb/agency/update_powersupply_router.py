@@ -81,7 +81,7 @@ def update_powersupply():
                     permission = %s,
                     status = %s,
                     update_date = %s,
-                    update_user = 'API'
+                    update_user = 'Dashboard'
                 WHERE powersupply_id = %s;
                 """
                 cursor.execute(update_query, (

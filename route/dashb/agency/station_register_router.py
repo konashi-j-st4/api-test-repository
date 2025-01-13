@@ -129,7 +129,7 @@ def station_register():
                     agency_id, app_location_number, station_name,
                     zip_code, prefecture, city, address, building,
                     open_time, end_time, open_day,
-                    now, 'API', now, 'API', 1
+                    now, 'Dashboard', now, 'Dashboard', 1
                 ))
                 conn.commit()
                 logger.info("ステーション情報の登録に成功しました")

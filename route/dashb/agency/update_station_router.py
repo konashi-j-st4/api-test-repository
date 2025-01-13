@@ -75,13 +75,13 @@ def update_station():
                     open_day = %s,
                     status = %s,
                     update_date = %s,
-                    update_user = 'API'
+                    update_user = %s
                 WHERE location_id = %s;
                 """
                 cursor.execute(update_query, (
                     station_name, zip_code, prefecture, city,
                     address, building, open_time, end_time,
-                    open_day, status, now, location_id
+                    open_day, status, now, 'Dashboard', location_id
                 ))
 
                 # 更新された行数を確認

@@ -175,7 +175,7 @@ def corporate_user_register():
                 """
                 cursor.execute(insert_user_query, (
                     ech_nav_code, app_user_number, 2, lastName, firstName, email,
-                    now, 'system', now, 'system', 1
+                    now, 'Dashboard', now, 'Dashboard', 1
                 ))
 
                 # 挿入したレコードのuser_idを取得

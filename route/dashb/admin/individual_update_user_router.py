@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 import logging
 import pymysql
 import os
+import datetime
 from response.response_base import create_success_response, create_error_response
 
 # logger settings
@@ -38,15 +39,16 @@ def individual_update_user():
         logger.info("MySQL instance successfully connected to Database.")
 
         with conn.cursor() as cursor:
+            now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             # m_user テーブルの更新
             update_user_query = """
             UPDATE m_user
             SET status = %s,
-                update_date = NOW(),
-                update_user = 'API'
+                update_date = %s,
+                update_user = %s
             WHERE user_id = %s;
             """
-            cursor.execute(update_user_query, (status, user_id))
+            cursor.execute(update_user_query, (status, now, 'Dashboard', user_id))
             
             # 変更を確定
             conn.commit()

@@ -71,19 +71,19 @@ def update_charge_fee():
                     UPDATE m_powersupply
                     SET price = %s,
                         update_date = %s,
-                        update_user = 'API'
+                        update_user = %s
                     WHERE powersupply_id = %s;
                     """
-                    cursor.execute(update_query, (price, now, powersupply_id))
+                    cursor.execute(update_query, (price, now, 'Dashboard', powersupply_id))
                 else:
                     update_query = """
                     UPDATE m_powersupply
                     SET price = %s,
                         update_date = %s,
-                        update_user = 'API'
+                        update_user = %s
                     WHERE location_id = %s;
                     """
-                    cursor.execute(update_query, (price, now, location_id))
+                    cursor.execute(update_query, (price, now, 'Dashboard', location_id))
 
                 # 更新された行数を確認
                 if cursor.rowcount == 0:

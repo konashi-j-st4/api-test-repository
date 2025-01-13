@@ -170,7 +170,7 @@ def agency_user_register():
                 """
                 cursor.execute(insert_user_query, (
                     ech_nav_code, app_user_number, 4, lastName, firstName,
-                    email, now, 'API', now, 'API', 1
+                    email, now, 'Dashboard', now, 'Dashboard', 1
                 ))
 
                 # 挿入したレコードのuser_idを取得
