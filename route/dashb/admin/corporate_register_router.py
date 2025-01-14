@@ -43,7 +43,7 @@ def corporate_register():
         telephone = data['telephone']
 
         with db.get_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 app_corporate_number = generate_unique_number(cursor, 'm_corporate', 'app_corporate_number', 3)
                 
@@ -60,7 +60,7 @@ def corporate_register():
                 result = cursor.fetchone()
                 if not result:
                     raise ValueError("Failed to retrieve the inserted corporate_id")
-                corporate_id = result[0]
+                corporate_id = result['corporate_id']
                 
                 logger.info("Corporate data was successfully registered in the database.")
                 return jsonify(create_success_response(

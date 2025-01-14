@@ -40,19 +40,19 @@ def admin_user_login():
                 AND a.user_category = 3;
                 """
                 cursor.execute(user_query, (app_user_number, password))
-                result = cursor.fetchall()
+                result = cursor.fetchone()
                 logger.info(user_query)
                 logger.info(result)
                 
                 if result:
                     return jsonify(create_success_response(
                         "You can reset your password.",
-                        result[0]
+                        {"app_user_number": result['app_user_number']}
                     )), 200
                 else:
                     return jsonify(create_success_response(
                         "User does not exist.[E001]",
-                        ""
+                        None
                     )), 200
 
     except Exception as e:

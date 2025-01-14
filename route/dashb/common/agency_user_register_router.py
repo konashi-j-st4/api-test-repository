@@ -23,8 +23,8 @@ cognito_client = boto3.client('cognito-idp')
 def generate_unique_number(cursor, table, column, length):
     for _ in range(5):  # 5回まで試行
         number = ''.join([str(random.randint(0, 9)) for _ in range(length)])
-        cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE {column} = %s", (number,))
-        if cursor.fetchone()[0] == 0:
+        cursor.execute(f"SELECT COUNT(*) as count FROM {table} WHERE {column} = %s", (number,))
+        if cursor.fetchone()['count'] == 0:
             return number
     raise ValueError(f"ユニークな{column}の生成に失敗しました")
 
@@ -47,12 +47,12 @@ def format_phone_number(phone):
 
 def generate_ech_nav_code(cursor, agency_id):
     cursor.execute("""
-    SELECT COUNT(*) + 1 
+    SELECT COUNT(*) + 1 as sequence_number
     FROM m_user u 
     JOIN m_user_agency uc ON u.user_id = uc.user_id 
     WHERE uc.agency_id = %s
     """, (agency_id,))
-    sequence_number = cursor.fetchone()[0]
+    sequence_number = cursor.fetchone()['sequence_number']
     
     ech_nav_code = f"AGENEchNaviCD{agency_id}{sequence_number:04d}"
     return ech_nav_code
@@ -131,7 +131,7 @@ def agency_user_register():
             )), 400
 
         with db.get_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 # app_user_numberからuser_idを取得
                 user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
                 cursor.execute(user_id_query, (app_user_number,))
@@ -141,7 +141,7 @@ def agency_user_register():
                         "指定されたapp_user_numberに対応するユーザーが見つかりません",
                         None
                     )), 404
-                user_id = result[0]
+                user_id = result['user_id']
 
                 # agency_idの取得
                 if not agency_id:
@@ -152,7 +152,7 @@ def agency_user_register():
                             "指定されたユーザーIDに対応する企業IDが見つかりません",
                             None
                         )), 404
-                    agency_id = result[0]
+                    agency_id = result['agency_id']
 
                 now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 app_user_number = generate_unique_number(cursor, 'm_user', 'app_user_number', 10)
@@ -175,7 +175,7 @@ def agency_user_register():
                 result = cursor.fetchone()
                 if not result:
                     raise ValueError("ユーザーIDの取得に失敗しました")
-                user_id_new = result[0]
+                user_id_new = result['user_id']
 
                 # m_user_agencyテーブルにインサート
                 insert_agency_query = """

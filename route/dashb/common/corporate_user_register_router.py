@@ -100,7 +100,7 @@ def get_corporate_id(cursor, user_id):
     result = cursor.fetchone()
     if not result:
         raise ValueError(f"corporate_idが見つかりません")
-    return result[0]
+    return result['corporate_id']
 
 corporate_user_register_router = Blueprint('corporate_user_register', __name__)
 
@@ -137,7 +137,7 @@ def corporate_user_register():
             )), 400
 
         with db.get_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 # app_user_numberからuser_idを取得
                 user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
                 cursor.execute(user_id_query, (app_user_number,))
@@ -147,7 +147,7 @@ def corporate_user_register():
                         "指定されたapp_user_numberに対応するユーザーが見つかりません",
                         None
                     )), 404
-                user_id = result[0]
+                user_id = result['user_id']
 
                 # corporate_idが提供されていない場合、user_idから取得
                 if not corporate_id:
@@ -173,7 +173,7 @@ def corporate_user_register():
                 result = cursor.fetchone()
                 if not result:
                     raise ValueError("登録したユーザーIDの取得に失敗しました")
-                user_id_new = result[0]
+                user_id_new = result['user_id']
 
                 # m_user_corporateテーブルにインサート
                 insert_corporate_query = """

@@ -24,7 +24,7 @@ def generate_app_location_number(cursor, agency_id):
 
     if result:
         # 既存のapp_location_numberがある場合、1を加算
-        last_number = int(result[0])
+        last_number = int(result['app_location_number'])
         app_location_number = last_number + 1
     else:
         # 新規の場合、1から開始
@@ -81,7 +81,7 @@ def station_register():
         logger.info('パラメータの取得が完了しました')
 
         with db.get_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 # app_user_numberからuser_idを取得
                 user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
                 cursor.execute(user_id_query, (app_user_number,))
@@ -91,7 +91,7 @@ def station_register():
                         "指定されたapp_user_numberに対応するユーザーが見つかりません",
                         None
                     )), 404
-                user_id = result[0]
+                user_id = result['user_id']
                 
                 # ユーザーに対応する企業IDを取得
                 user_query = 'SELECT agency_id FROM m_user_agency WHERE user_id = %s'
@@ -104,7 +104,7 @@ def station_register():
                         None
                     )), 404
 
-                agency_id = result[0]
+                agency_id = result['agency_id']
                 logger.info('企業IDの取得に成功しました')
 
                 # app_location_numberを生成

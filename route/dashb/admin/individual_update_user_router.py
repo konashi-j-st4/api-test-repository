@@ -27,14 +27,14 @@ def individual_update_user():
         status = data['status']
 
         with db.get_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 # app_user_numberからuser_idを取得
                 user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
                 cursor.execute(user_id_query, (app_user_number,))
                 result = cursor.fetchone()
                 if not result:
                     raise ValueError("Failed to retrieve the inserted user_id")
-                user_id = result[0]
+                user_id = result['user_id']
                 
                 now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 # m_user テーブルの更新
@@ -49,16 +49,16 @@ def individual_update_user():
 
                 # 更新された行数を確認
                 if cursor.rowcount > 0:
-                    logger.info(f"User {user_id} updated successfully.")
+                    logger.info(f"User {app_user_number} updated successfully.")
                     return jsonify(create_success_response(
                         "User data was successfully updated.",
-                        {"user_id": user_id}
+                        {"app_user_number": app_user_number}
                     )), 200
                 else:
-                    logger.warning(f"No user found with ID: {user_id}")
+                    logger.warning(f"No user found with ID: {app_user_number}")
                     return jsonify(create_error_response(
                         "No user found with the given ID.[E003]",
-                        {"user_id": user_id}
+                        {"app_user_number": app_user_number}
                     )), 404
 
     except Exception as e:
