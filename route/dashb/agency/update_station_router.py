@@ -4,6 +4,7 @@ import pymysql
 import os
 import datetime
 from response.response_base import create_success_response, create_error_response
+from db.db_connection import db
 
 # logger settings
 logger = logging.getLogger()
@@ -13,7 +14,6 @@ update_station_router = Blueprint('update_station', __name__)
 
 @update_station_router.route('/update_station', methods=['POST'])
 def update_station():
-    conn = None
     try:
         # リクエストボディから情報を取得
         data = request.get_json()
@@ -45,18 +45,7 @@ def update_station():
 
         logger.info(f"更新パラメータ: station_name={station_name}")
 
-        # MySQLに接続
-        conn = pymysql.connect(
-            host=os.environ['END_POINT'],
-            user=os.environ['USER_NAME'],
-            passwd=os.environ['PASSWORD'],
-            db=os.environ['DB_NAME'],
-            port=int(os.environ['PORT']),
-            connect_timeout=60
-        )
-        logger.info("データベースへの接続に成功しました")
-
-        try:
+        with db.get_connection() as conn:
             with conn.cursor() as cursor:
                 # 現在時刻を取得
                 now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -102,24 +91,9 @@ def update_station():
                     }
                 )), 200
 
-        except Exception as e:
-            logger.error(f"クエリ実行中にエラーが発生しました: {str(e)}")
-            if conn and conn.open:
-                conn.rollback()
-                logger.info("トランザクションをロールバックしました")
-            return jsonify(create_error_response(
-                "クエリ実行中にエラーが発生しました",
-                str(e)
-            )), 500
-
     except Exception as e:
         logger.error(f"エラーが発生しました: {str(e)}")
         return jsonify(create_error_response(
-            "パラメータまたは環境変数の取得に失敗しました",
+            "データ更新中にエラーが発生しました",
             str(e)
         )), 500
-
-    finally:
-        if conn and conn.open:
-            conn.close()
-            logger.info("データベース接続を終了しました")

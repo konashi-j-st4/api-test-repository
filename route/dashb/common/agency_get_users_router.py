@@ -3,6 +3,7 @@ import logging
 import pymysql
 import os
 from response.response_base import create_success_response, create_error_response
+from db.db_connection import db
 
 # logger settings
 logger = logging.getLogger()
@@ -12,7 +13,6 @@ agency_get_users_router = Blueprint('agency_get_users', __name__)
 
 @agency_get_users_router.route('/agency_get_users', methods=['POST'])
 def agency_get_users():
-    conn = None
     try:
         # リクエストボディから情報を取得
         data = request.get_json()
@@ -27,18 +27,7 @@ def agency_get_users():
         get_all_flg = data.get('getAllFlg')
         get_company_users_flg = data.get('getCompanyUsersFlg')
 
-        # MySQLに接続
-        conn = pymysql.connect(
-            host=os.environ['END_POINT'],
-            user=os.environ['USER_NAME'],
-            passwd=os.environ['PASSWORD'],
-            db=os.environ['DB_NAME'],
-            port=int(os.environ['PORT']),
-            connect_timeout=60
-        )
-        logger.info("データベースへの接続に成功しました")
-
-        try:
+        with db.get_connection() as conn:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 # app_user_numberからuser_idを取得
                 user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
@@ -49,7 +38,7 @@ def agency_get_users():
                         "指定されたapp_user_numberに対応するユーザーが見つかりません",
                         None
                     )), 404
-                user_id = result[0]
+                user_id = result['user_id']
                 
                 if get_all_flg == 1:
                     # getAllFlgが1の場合のクエリ
@@ -99,21 +88,9 @@ def agency_get_users():
                     result if result else None
                 )), 200
 
-        except Exception as e:
-            logger.error(f"クエリ実行中にエラーが発生しました: {str(e)}")
-            return jsonify(create_error_response(
-                "クエリ実行中にエラーが発生しました",
-                str(e)
-            )), 500
-
     except Exception as e:
         logger.error(f"エラーが発生しました: {str(e)}")
         return jsonify(create_error_response(
-            "パラメータまたは環境変数の取得に失敗しました",
+            "データ取得中にエラーが発生しました",
             str(e)
         )), 500
-
-    finally:
-        if conn and conn.open:
-            conn.close()
-            logger.info("データベース接続を終了しました")

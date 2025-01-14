@@ -3,6 +3,7 @@ import logging
 import pymysql
 import os
 from response.response_base import create_success_response, create_error_response
+from db.db_connection import db
 import boto3
 from botocore.exceptions import ClientError
 import re
@@ -45,7 +46,6 @@ corporate_user_login_router = Blueprint('corporate_user_login', __name__)
 
 @corporate_user_login_router.route('/corporate_user_login', methods=['POST'])
 def corporate_user_login():
-    conn = None
     try:
         # リクエストボディから情報を取得
         data = request.get_json()
@@ -119,18 +119,7 @@ def corporate_user_login():
                 str(e)
             )), 500
 
-        # MySQLに接続
-        conn = pymysql.connect(
-            host=os.environ['END_POINT'],
-            user=os.environ['USER_NAME'],
-            passwd=os.environ['PASSWORD'],
-            db=os.environ['DB_NAME'],
-            port=int(os.environ['PORT']),
-            connect_timeout=60
-        )
-        logger.info("データベースへの接続に成功しました")
-
-        try:
+        with db.get_connection() as conn:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 user_query = """
                 SELECT app_user_number 
@@ -152,21 +141,9 @@ def corporate_user_login():
                         None
                     )), 404
 
-        except Exception as e:
-            logger.error(f"データベースクエリ実行中にエラーが発生しました: {str(e)}")
-            return jsonify(create_error_response(
-                "データベースクエリ実行中にエラーが発生しました",
-                str(e)
-            )), 500
-
     except Exception as e:
         logger.error(f"エラーが発生しました: {str(e)}")
         return jsonify(create_error_response(
-            "パラメータまたは環境変数の取得に失敗しました",
+            "データ取得中にエラーが発生しました",
             str(e)
         )), 500
-
-    finally:
-        if conn and conn.open:
-            conn.close()
-            logger.info("データベース接続を終了しました")

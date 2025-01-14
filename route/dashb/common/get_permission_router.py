@@ -3,6 +3,7 @@ import logging
 import pymysql
 import os
 from response.response_base import create_success_response, create_error_response
+from db.db_connection import db
 
 # logger settings
 logger = logging.getLogger()
@@ -12,7 +13,6 @@ get_permission_router = Blueprint('get_permission', __name__)
 
 @get_permission_router.route('/get_permission', methods=['POST'])
 def get_permission():
-    conn = None
     try:
         # リクエストボディから情報を取得
         data = request.get_json()
@@ -26,18 +26,7 @@ def get_permission():
         app_user_number = data.get('userId')
         user_category = data.get('userCategory')
 
-        # MySQLに接続
-        conn = pymysql.connect(
-            host=os.environ['END_POINT'],
-            user=os.environ['USER_NAME'],
-            passwd=os.environ['PASSWORD'],
-            db=os.environ['DB_NAME'],
-            port=int(os.environ['PORT']),
-            connect_timeout=60
-        )
-        logger.info("データベースへの接続に成功しました")
-
-        try:
+        with db.get_connection() as conn:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 base_query = """
                 SELECT permission_id, permission_name
@@ -56,7 +45,7 @@ def get_permission():
                             "指定されたapp_user_numberに対応するユーザーが見つかりません",
                             None
                         )), 404
-                    user_id = result[0]
+                    user_id = result['user_id']
                     user_permission_query = """
                     SELECT permission FROM m_user_agency WHERE user_id = %s;
                     """
@@ -84,21 +73,9 @@ def get_permission():
                     result if result else None
                 )), 200
 
-        except Exception as e:
-            logger.error(f"クエリ実行中にエラーが発生しました: {str(e)}")
-            return jsonify(create_error_response(
-                "クエリ実行中にエラーが発生しました",
-                str(e)
-            )), 500
-
     except Exception as e:
         logger.error(f"エラーが発生しました: {str(e)}")
         return jsonify(create_error_response(
-            "パラメータまたは環境変数の取得に失敗しました",
+            "データ取得中にエラーが発生しました",
             str(e)
-        )), 500
-
-    finally:
-        if conn and conn.open:
-            conn.close()
-            logger.info("データベース接続を終了しました") 
+        )), 500 

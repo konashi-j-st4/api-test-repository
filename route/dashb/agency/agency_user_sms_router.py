@@ -9,6 +9,7 @@ import hmac
 import hashlib
 import base64
 import re
+from db.db_connection import db
 
 # Logger settings
 logger = logging.getLogger()
@@ -47,7 +48,6 @@ agency_user_sms_router = Blueprint('agency_user_sms', __name__)
 
 @agency_user_sms_router.route('/agency_user_sms', methods=['POST'])
 def agency_user_sms():
-    conn = None
     try:
         # リクエストボディから情報を取得
         data = request.get_json()
@@ -128,27 +128,17 @@ def agency_user_sms():
         client_id = os.environ['COGNITO_CLIENT_ID']
         client_secret = os.environ['COGNITO_CLIENT_SECRET']
 
-        # MySQLに接続
-        conn = pymysql.connect(
-            host=os.environ['END_POINT'],
-            user=os.environ['USER_NAME'],
-            passwd=os.environ['PASSWORD'],
-            db=os.environ['DB_NAME'],
-            port=int(os.environ['PORT']),
-            connect_timeout=60
-        )
-        logger.info("データベースへの接続に成功しました")
-
         # Cognitoクライアントの作成
         cognito_client = boto3.client('cognito-idp')
 
         try:
             if function_type == 0:
                 # 初回認証時の処理
-                with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                    user_query = "SELECT app_user_number FROM m_user WHERE echnavicode = %s;"
-                    cursor.execute(user_query, (ech_navi_code,))
-                    result = cursor.fetchone()
+                with db.get_connection() as conn:
+                    with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                        user_query = "SELECT app_user_number FROM m_user WHERE echnavicode = %s;"
+                        cursor.execute(user_query, (ech_navi_code,))
+                        result = cursor.fetchone()
                     
                 if not result:
                     return jsonify(create_error_response(
@@ -251,10 +241,11 @@ def agency_user_sms():
 
             elif function_type == 1:
                 # SMS認証時の処理
-                with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                    user_query = "SELECT app_user_number FROM m_user WHERE echnavicode = %s;"
-                    cursor.execute(user_query, (ech_navi_code,))
-                    result = cursor.fetchone()
+                with db.get_connection() as conn:
+                    with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                        user_query = "SELECT app_user_number FROM m_user WHERE echnavicode = %s;"
+                        cursor.execute(user_query, (ech_navi_code,))
+                        result = cursor.fetchone()
                     
                 if not result:
                     return jsonify(create_error_response(
@@ -430,8 +421,3 @@ def agency_user_sms():
             "パラメータまたは環境変数の取得に失敗しました",
             str(e)
         )), 500
-
-    finally:
-        if conn and conn.open:
-            conn.close()
-            logger.info("データベース接続を終了しました")

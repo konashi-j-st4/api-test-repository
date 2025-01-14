@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
 import logging
 import pymysql
-import os
 import datetime
 import random
 from response.response_base import create_success_response, create_error_response
+from db.db_connection import db
 
 # logger settings
 logger = logging.getLogger()
@@ -23,7 +23,6 @@ corporate_register_router = Blueprint('corporate_register', __name__)
 
 @corporate_register_router.route('/corporate_register', methods=['POST'])
 def corporate_register():
-    conn = None
     try:
         # リクエストボディから情報を取得
         data = request.get_json()
@@ -43,62 +42,36 @@ def corporate_register():
         country = data['country']
         telephone = data['telephone']
 
-        # MySQLに接続
-        conn = pymysql.connect(
-            host=os.environ['END_POINT'],
-            user=os.environ['USER_NAME'],
-            passwd=os.environ['PASSWORD'],
-            db=os.environ['DB_NAME'],
-            port=int(os.environ['PORT']),
-            connect_timeout=60
-        )
-        logger.info("MySQL instance successfully connected to Database.")
-
-        with conn.cursor() as cursor:
-            # トランザクション開始
-            conn.begin()
-
-            now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            app_corporate_number = generate_unique_number(cursor, 'm_corporate', 'app_corporate_number', 3)
-            
-            # m_corporateテーブルにインサート
-            insert_corporate_query = """
-            INSERT INTO m_corporate (app_corporate_number, company, zip_code, prefecture, city, address, building, country, telephone, create_date, create_user, update_date, update_user, status)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-            """
-            cursor.execute(insert_corporate_query, (app_corporate_number, corporate, zip_code, prefecture, city, address, building, country, telephone, now, 'admin', now, 'admin', 1))
-            
-            # 挿入したレコードのcorporate_idを取得
-            select_corporate_id_query = "SELECT corporate_id FROM m_corporate WHERE app_corporate_number = %s;"
-            cursor.execute(select_corporate_id_query, (app_corporate_number,))
-            result = cursor.fetchone()
-            if not result:
-                raise ValueError("Failed to retrieve the inserted corporate_id")
-            corporate_id = result[0]
-            
-            # すべての操作が成功したらコミット
-            conn.commit()
-            
-            logger.info("Corporate data was successfully registered in the database.")
-            return jsonify(create_success_response(
-                "Corporate data was successfully registered in the database.",
-                {
-                    "corporate_id": corporate_id,
-                    "app_corporate_number": app_corporate_number
-                }
-            )), 200
+        with db.get_connection() as conn:
+            with conn.cursor() as cursor:
+                now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                app_corporate_number = generate_unique_number(cursor, 'm_corporate', 'app_corporate_number', 3)
+                
+                # m_corporateテーブルにインサート
+                insert_corporate_query = """
+                INSERT INTO m_corporate (app_corporate_number, company, zip_code, prefecture, city, address, building, country, telephone, create_date, create_user, update_date, update_user, status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                """
+                cursor.execute(insert_corporate_query, (app_corporate_number, corporate, zip_code, prefecture, city, address, building, country, telephone, now, 'admin', now, 'admin', 1))
+                
+                # 挿入したレコードのcorporate_idを取得
+                select_corporate_id_query = "SELECT corporate_id FROM m_corporate WHERE app_corporate_number = %s;"
+                cursor.execute(select_corporate_id_query, (app_corporate_number,))
+                result = cursor.fetchone()
+                if not result:
+                    raise ValueError("Failed to retrieve the inserted corporate_id")
+                corporate_id = result[0]
+                
+                logger.info("Corporate data was successfully registered in the database.")
+                return jsonify(create_success_response(
+                    "Corporate data was successfully registered in the database.",
+                    {
+                        "corporate_id": corporate_id,
+                        "app_corporate_number": app_corporate_number
+                    }
+                )), 200
 
     except Exception as e:
         logger.error(f"An error occurred: {str(e)}")
         err_msg = 'An error occurred while registering the corporate.'
-        
-        # エラーが発生した場合、DBをロールバック
-        if conn and conn.open:
-            conn.rollback()
-            logger.info("Database transaction rolled back.")
-        
         return jsonify(create_error_response(err_msg, str(e))), 500
-
-    finally:
-        if conn and conn.open:
-            conn.close()

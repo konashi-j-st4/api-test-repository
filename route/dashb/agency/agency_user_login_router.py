@@ -10,6 +10,7 @@ import hmac
 import base64
 import hashlib
 from response.response_base import create_success_response, create_error_response
+from db.db_connection import db
 
 # Logger settings
 logger = logging.getLogger()
@@ -60,12 +61,6 @@ def agency_user_login():
         password = body['password']
 
         formatted_phone = format_phone_number(phone_number)
-
-        db_user_name = os.environ['USER_NAME']
-        db_password = os.environ['PASSWORD']
-        end_point = os.environ['END_POINT']
-        db_name = os.environ['DB_NAME']
-        port = int(os.environ['PORT'])
 
         user_pool_id = os.environ['COGNITO_USER_POOL_ID']
         client_id = os.environ['COGNITO_CLIENT_ID']
@@ -119,33 +114,30 @@ def agency_user_login():
 
             # MySQLに接続して処理を続行
             try:
-                conn = pymysql.connect(host=end_point, user=db_user_name,
-                                    passwd=db_password, db=db_name, port=port, connect_timeout=60)
-                logger.info("データベースへの接続に成功しました")
-
-                with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                    user_query = """
-                    SELECT app_user_number 
-                    FROM m_user
-                    WHERE echnavicode = %s
-                    AND user_category = 4;
-                    """
-                    cursor.execute(user_query, (ech_nav_code,))
-                    result = cursor.fetchone()
-                    
-                    if result:
-                        return jsonify(create_success_response(
-                            "ログインに成功しました",
-                            {
-                                "user_id": result['app_user_number'],
-                                "accessToken": auth_response['AuthenticationResult']['AccessToken']
-                            }
-                        )), 200
-                    else:
-                        return jsonify(create_error_response(
-                            "ユーザーが見つかりません[E002]",
-                            None
-                        )), 404
+                with db.get_connection() as conn:
+                    with conn.cursor(pymysql.cursors.DictCursor) as cursor:
+                        user_query = """
+                        SELECT app_user_number 
+                        FROM m_user
+                        WHERE echnavicode = %s
+                        AND user_category = 4;
+                        """
+                        cursor.execute(user_query, (ech_nav_code,))
+                        result = cursor.fetchone()
+                        
+                        if result:
+                            return jsonify(create_success_response(
+                                "ログインに成功しました",
+                                {
+                                    "user_id": result['app_user_number'],
+                                    "accessToken": auth_response['AuthenticationResult']['AccessToken']
+                                }
+                            )), 200
+                        else:
+                            return jsonify(create_error_response(
+                                "ユーザーが見つかりません[E002]",
+                                None
+                            )), 404
 
             except Exception as db_error:
                 logger.error(f"データベースエラー: {str(db_error)}")
@@ -153,9 +145,6 @@ def agency_user_login():
                     "データベース処理中にエラーが発生しました",
                     str(db_error)
                 )), 500
-            finally:
-                if 'conn' in locals() and conn.open:
-                    conn.close()
 
         except cognito_client.exceptions.NotAuthorizedException:
             logger.info("電話番号またはパスワードが無効です[E001]")

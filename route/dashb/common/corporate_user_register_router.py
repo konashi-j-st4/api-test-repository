@@ -3,18 +3,12 @@ import logging
 import pymysql
 import os
 from response.response_base import create_success_response, create_error_response
+from db.db_connection import db
 import datetime
 import random
 import boto3
 from botocore.exceptions import ClientError
 import re
-
-# RDS設定
-db_user_name = os.environ['USER_NAME']
-db_password = os.environ['PASSWORD']
-end_point = os.environ['END_POINT']
-db_name = os.environ['DB_NAME']
-port = int(os.environ['PORT'])
 
 # Cognito設定
 COGNITO_USER_POOL_ID = os.environ['COGNITO_USER_POOL_ID']
@@ -112,7 +106,6 @@ corporate_user_register_router = Blueprint('corporate_user_register', __name__)
 
 @corporate_user_register_router.route('/corporate_user_register', methods=['POST'])
 def corporate_user_register():
-    conn = None
     try:
         # リクエストボディから情報を取得
         data = request.get_json()
@@ -143,18 +136,7 @@ def corporate_user_register():
                 None
             )), 400
 
-        # MySQLに接続
-        conn = pymysql.connect(
-            host=end_point,
-            user=db_user_name,
-            passwd=db_password,
-            db=db_name,
-            port=port,
-            connect_timeout=60
-        )
-        logger.info("データベースへの接続に成功しました")
-
-        try:
+        with db.get_connection() as conn:
             with conn.cursor() as cursor:
                 # app_user_numberからuser_idを取得
                 user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
@@ -166,9 +148,6 @@ def corporate_user_register():
                         None
                     )), 404
                 user_id = result[0]
-                
-                # トランザクション開始
-                conn.begin()
 
                 # corporate_idが提供されていない場合、user_idから取得
                 if not corporate_id:
@@ -220,22 +199,9 @@ def corporate_user_register():
                     }
                 )), 200
 
-        except Exception as e:
-            conn.rollback()
-            logger.error(f"データベース処理中にエラーが発生しました: {str(e)}")
-            return jsonify(create_error_response(
-                "ユーザー登録中にエラーが発生しました",
-                str(e)
-            )), 500
-
     except Exception as e:
         logger.error(f"エラーが発生しました: {str(e)}")
         return jsonify(create_error_response(
-            "パラメータまたは環境変数の取得に失敗しました",
+            "データ登録中にエラーが発生しました",
             str(e)
-        )), 500
-
-    finally:
-        if conn and conn.open:
-            conn.close()
-            logger.info("データベース接続を終了しました") 
+        )), 500 
