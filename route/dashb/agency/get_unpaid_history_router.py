@@ -23,13 +23,13 @@ def get_unpaid_history():
             )), 400
 
         # 必須パラメータの確認
-        if 'user_id' not in data:
+        if 'app_user_number' not in data:
             return jsonify(create_error_response(
-                "user_idは必須です",
+                "app_user_numberは必須です",
                 None
             )), 400
 
-        app_user_number = data['user_id']
+        app_user_number = data['app_user_number']
         logger.info(f"Received app_user_number: {app_user_number}")
 
         with db.get_connection() as conn:
@@ -56,7 +56,7 @@ def get_unpaid_history():
                 
                 if not permission_result:
                     return jsonify(create_error_response(
-                        f"ユーザーID {app_user_number} の権限が見つかりません",
+                        f"app_user_number {app_user_number} の権限が見つかりません",
                         None
                     )), 404
                 

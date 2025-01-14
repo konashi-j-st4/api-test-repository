@@ -23,7 +23,7 @@ def agency_get_users():
             )), 400
 
         # パラメータの取得
-        app_user_number = data.get('userId')
+        app_user_number = data.get('app_user_number')
         get_all_flg = data.get('getAllFlg')
         get_company_users_flg = data.get('getCompanyUsersFlg')
 
@@ -43,7 +43,7 @@ def agency_get_users():
                 if get_all_flg == 1:
                     # getAllFlgが1の場合のクエリ
                     user_query = """
-                    SELECT a.user_id, a.app_user_number, a.lastname, a.firstname, a.status, b.permission, c.company
+                    SELECT a.app_user_number, a.lastname, a.firstname, a.status, b.permission, c.company
                     FROM m_user a
                     INNER JOIN m_user_agency b ON a.user_id = b.user_id
                     INNER JOIN m_agency c ON b.agency_id = c.agency_id
@@ -55,7 +55,7 @@ def agency_get_users():
                 elif get_company_users_flg == 1:
                     # getCompanyUsersFlgが1の場合のクエリ
                     user_query = """
-                    SELECT a.user_id, a.app_user_number, a.lastname, a.firstname, a.status, b.permission 
+                    SELECT a.app_user_number, a.lastname, a.firstname, a.status, b.permission 
                     FROM m_user a
                     INNER JOIN m_user_agency b ON a.user_id = b.user_id
                     WHERE b.agency_id = (
@@ -70,7 +70,7 @@ def agency_get_users():
                 else:
                     # getCompanyUsersFlgが1以外、かつgetAllFlgが1以外の場合のクエリ
                     user_query = """
-                    SELECT a.user_id, a.app_user_number, a.lastname, a.firstname, a.user_category, a.status, b.permission, c.permission_name
+                    SELECT a.app_user_number, a.lastname, a.firstname, a.user_category, a.status, b.permission, c.permission_name
                     FROM m_user a
                     INNER JOIN m_user_agency b ON a.user_id = b.user_id
                     INNER JOIN m_permission c ON b.permission = c.permission_id

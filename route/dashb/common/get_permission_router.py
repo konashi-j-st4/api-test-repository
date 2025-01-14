@@ -23,7 +23,7 @@ def get_permission():
             )), 400
 
         # パラメータの取得
-        app_user_number = data.get('userId')
+        app_user_number = data.get('app_user_number')
         user_category = data.get('userCategory')
 
         with db.get_connection() as conn:

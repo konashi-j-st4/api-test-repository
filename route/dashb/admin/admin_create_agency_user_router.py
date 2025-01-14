@@ -15,10 +15,10 @@ def admin_create_agency_user():
     try:
         # リクエストボディから情報を取得
         body = request.get_json()
-        if 'user_id' not in body or 'agency_id' not in body:
-            raise ValueError("user_id and agency_id are required in the request body")
+        if 'app_user_number' not in body or 'agency_id' not in body:
+            raise ValueError("app_user_number and agency_id are required in the request body")
             
-        app_user_number = body['user_id']
+        app_user_number = body['app_user_number']
         agency_id = body['agency_id']
         
     except Exception as e:

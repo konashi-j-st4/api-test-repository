@@ -22,7 +22,7 @@ def individual_get_users():
                 if email:
                     # メールアドレスが指定されている場合、該当ユーザーを取得
                     user_query = """
-                    SELECT a.user_id, a.app_user_number, a.lastname, a.firstname, a.status, a.mail
+                    SELECT a.app_user_number, a.lastname, a.firstname, a.status, a.mail
                     FROM m_user a
                     INNER JOIN m_user_general b ON a.user_id = b.user_id
                     WHERE a.user_category = 1 
@@ -34,7 +34,7 @@ def individual_get_users():
                 else:
                     # メールアドレスが指定されていない場合、全件取得
                     user_query = """
-                    SELECT a.user_id, a.app_user_number, a.lastname, a.firstname, a.status, a.mail
+                    SELECT a.app_user_number, a.lastname, a.firstname, a.status, a.mail
                     FROM m_user a
                     INNER JOIN m_user_general b ON a.user_id = b.user_id
                     WHERE a.user_category = 1

@@ -17,11 +17,11 @@ def admin_user_login():
         # リクエストボディから情報を取得
         body = request.get_json()
         
-        if 'userId' in body and 'password' in body:
-            userId = body['userId']
+        if 'app_user_number' in body and 'password' in body:
+            app_user_number = body['app_user_number']
             password = body['password']
         else:
-            raise ValueError("userId or password is missing in the request body")
+            raise ValueError("app_user_number or password is missing in the request body")
             
     except Exception as e:
         err_msg = 'Failed to retrieve query parameters or environment variables'
@@ -35,11 +35,11 @@ def admin_user_login():
                 SELECT a.app_user_number 
                 FROM m_user a
                 INNER JOIN m_user_admin b ON a.user_id = b.user_id
-                WHERE a.user_id = %s
+                WHERE a.app_user_number = %s
                 AND b.password = %s
                 AND a.user_category = 3;
                 """
-                cursor.execute(user_query, (userId, password))
+                cursor.execute(user_query, (app_user_number, password))
                 result = cursor.fetchall()
                 logger.info(user_query)
                 logger.info(result)

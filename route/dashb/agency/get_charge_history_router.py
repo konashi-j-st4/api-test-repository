@@ -31,7 +31,7 @@ def get_charge_history():
 
         start_period = data['start_period']
         end_period = data['end_period']
-        app_user_number = data.get('user_id')
+        app_user_number = data.get('app_user_number')
         powersupply_ids = data.get('powersupply_ids')
 
         with db.get_connection() as conn:

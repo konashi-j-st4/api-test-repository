@@ -25,7 +25,7 @@ def agency_update_user():
             )), 400
 
         # 必須パラメータの確認
-        required_fields = ['user_id', 'lastname', 'firstname', 'status', 'permission']
+        required_fields = ['app_user_number', 'lastname', 'firstname', 'status', 'permission']
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
             return jsonify(create_error_response(
@@ -34,7 +34,7 @@ def agency_update_user():
             )), 400
 
         # パラメータの取得
-        app_user_number = data['user_id']
+        app_user_number = data['app_user_number']
         lastname = data['lastname']
         firstname = data['firstname']
         status = data['status']
@@ -126,7 +126,7 @@ def agency_update_user():
                 return jsonify(create_success_response(
                     "ユーザー情報の更新に成功しました",
                     {
-                        "user_id": app_user_number,
+                        "app_user_number": app_user_number,
                         "lastname": lastname,
                         "firstname": firstname
                     }

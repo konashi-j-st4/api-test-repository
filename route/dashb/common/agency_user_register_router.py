@@ -109,7 +109,7 @@ def agency_user_register():
             )), 400
 
         # パラメータの取得
-        app_user_number = data.get('userId')
+        app_user_number = data.get('app_user_number')
         agency_id = data.get('agencyId')
         lastName = data.get('lastName')
         firstName = data.get('firstName')
@@ -120,7 +120,7 @@ def agency_user_register():
         # バリデーション
         if not (app_user_number or agency_id):
             return jsonify(create_error_response(
-                "userIdまたはagencyIdのいずれかが必要です",
+                "app_user_numberまたはagencyIdのいずれかが必要です",
                 None
             )), 400
 

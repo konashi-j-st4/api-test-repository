@@ -116,7 +116,7 @@ def corporate_user_register():
             )), 400
 
         # 必須パラメータの取得
-        app_user_number = data.get('userId')
+        app_user_number = data.get('app_user_number')
         corporate_id = data.get('corporateId')
         lastName = data.get('lastName')
         firstName = data.get('firstName')
@@ -126,7 +126,7 @@ def corporate_user_register():
         # パラメータのバリデーション
         if not (app_user_number or corporate_id):
             return jsonify(create_error_response(
-                "userIdまたはcorporateIdのいずれかが必要です",
+                "app_user_numberまたはcorporateIdのいずれかが必要です",
                 None
             )), 400
 

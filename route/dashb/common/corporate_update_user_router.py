@@ -23,7 +23,7 @@ def corporate_update_user():
             )), 400
 
         # 必須パラメータの取得と検証
-        required_fields = ['user_id', 'lastname', 'firstname', 'status', 'permission']
+        required_fields = ['app_user_number', 'lastname', 'firstname', 'status', 'permission']
         for field in required_fields:
             if field not in data:
                 return jsonify(create_error_response(
@@ -31,7 +31,7 @@ def corporate_update_user():
                     None
                 )), 400
 
-        app_user_number = data['user_id']
+        app_user_number = data['app_user_number']
         lastname = data['lastname']
         firstname = data['firstname']
         status = data['status']

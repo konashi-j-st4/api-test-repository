@@ -43,7 +43,7 @@ def get_powersupplies():
             )), 400
 
         location_id = data['location_id']
-        app_user_number = data['user_id']
+        app_user_number = data['app_user_number']
         logger.info(f"Received location_id: {location_id}, app_user_number: {app_user_number}")
 
         with db.get_connection() as conn:

@@ -23,12 +23,12 @@ def corporate_get_users():
             )), 400
 
         # パラメータの取得
-        app_user_number = data.get('userId')
+        app_user_number = data.get('app_user_number')
         get_all_flg = data.get('getAllFlg', 0)  # デフォルト値は0
 
         if not app_user_number and get_all_flg != 1:
             return jsonify(create_error_response(
-                "userIdは必須です（getAllFlgが1の場合を除く）",
+                "app_user_numberは必須です（getAllFlgが1の場合を除く）",
                 None
             )), 400
 
@@ -37,7 +37,7 @@ def corporate_get_users():
                 if get_all_flg == 1:
                     # getAllFlgが1の場合、全件取得
                     user_query = """
-                    SELECT a.user_id, a.app_user_number, a.lastname, a.firstname, a.status, 
+                    SELECT a.app_user_number, a.lastname, a.firstname, a.status, 
                            b.permission, b.corporate_id, c.company
                     FROM m_user a
                     INNER JOIN m_user_corporate b ON a.user_id = b.user_id
@@ -61,7 +61,7 @@ def corporate_get_users():
                     
                     # getAllFlgが1以外の場合、ユーザーIDに基づいて取得
                     user_query = """
-                    SELECT a.user_id, a.app_user_number, a.lastname, a.firstname, a.status, b.permission 
+                    SELECT a.app_user_number, a.lastname, a.firstname, a.status, b.permission 
                     FROM m_user a
                     INNER JOIN m_user_corporate b ON a.user_id = b.user_id
                     WHERE b.corporate_id = (

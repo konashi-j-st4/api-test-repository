@@ -18,12 +18,12 @@ def individual_update_user():
         data = request.get_json()
         
         # 必須フィールドの取得と検証
-        required_fields = ['user_id', 'status']
+        required_fields = ['app_user_number', 'status']
         for field in required_fields:
             if field not in data:
                 raise ValueError(f"Missing required field: {field}")
         
-        app_user_number = data['user_id']
+        app_user_number = data['app_user_number']
         status = data['status']
 
         with db.get_connection() as conn:

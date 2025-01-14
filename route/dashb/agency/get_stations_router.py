@@ -52,7 +52,7 @@ def get_stations():
                 None
             )), 400
 
-        app_user_number = data['userId']
+        app_user_number = data['app_user_number']
         status = data['status']
         logger.info(f"Received app_user_number: {app_user_number}, status: {status}")
 
@@ -72,7 +72,7 @@ def get_stations():
                 # 実行クエリ
                 user_query = """
                 SELECT 
-                    a.user_id,
+                    a.app_user_number,
                     b.location_id,
                     b.station_name,
                     b.agency_id,
