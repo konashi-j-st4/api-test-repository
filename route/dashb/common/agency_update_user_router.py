@@ -41,7 +41,7 @@ def agency_update_user():
         permission = data['permission']
 
         with db.get_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 # app_user_numberからuser_idを取得
                 user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
                 cursor.execute(user_id_query, (app_user_number,))
@@ -83,13 +83,13 @@ def agency_update_user():
                     cursor.execute(select_query, (user_id,))
                     result = cursor.fetchone()
 
-                    if not result or not result[0]:
+                    if not result or not result['mail']:
                         return jsonify(create_error_response(
                             "指定されたユーザーのメールアドレスが見つかりません",
                             None
                         )), 404
 
-                    email = result[0]
+                    email = result['mail']
                     cognito_client = boto3.client('cognito-idp')
                     user_pool_id = os.environ['COGNITO_USER_POOL_ID']
 
