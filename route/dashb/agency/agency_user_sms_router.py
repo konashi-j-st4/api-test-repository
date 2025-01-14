@@ -5,44 +5,12 @@ import os
 from response.response_base import create_success_response, create_error_response
 import boto3
 from botocore.exceptions import ClientError
-import hmac
-import hashlib
-import base64
-import re
 from db.db_connection import db
+from utils.utils import format_phone_number, calculate_secret_hash
 
 # Logger settings
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-def get_secret_hash(username, client_id, client_secret):
-    msg = username + client_id
-    dig = hmac.new(bytes(client_secret, 'utf-8'), 
-        msg = msg.encode('utf-8'), 
-        digestmod=hashlib.sha256).digest()
-    d2 = base64.b64encode(dig).decode()
-    return d2
-
-def format_phone_number(phone):
-    logger.info(f"元の電話番号: {phone}")
-
-    # 数字以外の文字を削除
-    digits_only = re.sub(r'\D', '', phone)
-    
-    # 日本の電話番号を想定
-    if digits_only.startswith('0'):
-        formatted = '+81' + digits_only[1:]
-    elif digits_only.startswith('81'):
-        formatted = '+' + digits_only
-    else:
-        formatted = '+81' + digits_only
-
-    # E.164 形式の検証
-    if not re.match(r'^\+81[1-9]\d{9}$', formatted):
-        raise ValueError(f"電話番号のフォーマットが不正です: {formatted}")
-
-    logger.info(f"フォーマット後の電話番号: {formatted}")
-    return formatted
 
 agency_user_sms_router = Blueprint('agency_user_sms', __name__)
 
@@ -175,7 +143,7 @@ def agency_user_sms():
                                 AuthParameters={
                                     'USERNAME': formatted_phone,
                                     'PASSWORD': initial_password,
-                                    'SECRET_HASH': get_secret_hash(formatted_phone, client_id, client_secret)
+                                    'SECRET_HASH': calculate_secret_hash(formatted_phone, client_id, client_secret)
                                 }
                             )
                             
@@ -188,7 +156,7 @@ def agency_user_sms():
                                     ChallengeResponses={
                                         'USERNAME': formatted_phone,
                                         'NEW_PASSWORD': new_password,
-                                        'SECRET_HASH': get_secret_hash(formatted_phone, client_id, client_secret),
+                                        'SECRET_HASH': calculate_secret_hash(formatted_phone, client_id, client_secret),
                                         'USER_ID_FOR_SRP': formatted_phone
                                     }
                                 )
@@ -215,7 +183,7 @@ def agency_user_sms():
                             AuthParameters={
                                 'USERNAME': formatted_phone,
                                 'PASSWORD': new_password,
-                                'SECRET_HASH': get_secret_hash(formatted_phone, client_id, client_secret)
+                                'SECRET_HASH': calculate_secret_hash(formatted_phone, client_id, client_secret)
                             }
                         )
                         
@@ -264,7 +232,7 @@ def agency_user_sms():
                         ChallengeResponses={
                             'USERNAME': formatted_phone,
                             'SMS_MFA_CODE': auth_code,
-                            'SECRET_HASH': get_secret_hash(formatted_phone, client_id, client_secret)
+                            'SECRET_HASH': calculate_secret_hash(formatted_phone, client_id, client_secret)
                         }
                     )
                     
@@ -321,7 +289,7 @@ def agency_user_sms():
                         AuthParameters={
                             'USERNAME': formatted_phone,
                             'PASSWORD': new_password,
-                            'SECRET_HASH': get_secret_hash(formatted_phone, client_id, client_secret)
+                            'SECRET_HASH': calculate_secret_hash(formatted_phone, client_id, client_secret)
                         }
                     )
 
@@ -347,7 +315,7 @@ def agency_user_sms():
                 try:
                     response = cognito_client.forgot_password(
                         ClientId=client_id,
-                        SecretHash=get_secret_hash(formatted_phone, client_id, client_secret),
+                        SecretHash=calculate_secret_hash(formatted_phone, client_id, client_secret),
                         Username=formatted_phone
                     )
                     
@@ -373,7 +341,7 @@ def agency_user_sms():
                 try:
                     response = cognito_client.confirm_forgot_password(
                         ClientId=client_id,
-                        SecretHash=get_secret_hash(formatted_phone, client_id, client_secret),
+                        SecretHash=calculate_secret_hash(formatted_phone, client_id, client_secret),
                         Username=formatted_phone,
                         ConfirmationCode=auth_code,
                         Password=new_password

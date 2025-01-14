@@ -11,6 +11,7 @@ import base64
 import hashlib
 from response.response_base import create_success_response, create_error_response
 from db.db_connection import db
+from utils.utils import format_phone_number, calculate_secret_hash
 
 # Logger settings
 logger = logging.getLogger()
@@ -18,31 +19,6 @@ logger.setLevel(logging.INFO)
 
 # Cognito client
 cognito_client = boto3.client('cognito-idp')
-
-def calculate_secret_hash(username, client_id, client_secret):
-    message = username + client_id
-    dig = hmac.new(client_secret.encode('utf-8'), 
-                   msg=message.encode('utf-8'), 
-                   digestmod=hashlib.sha256).digest()
-    return base64.b64encode(dig).decode()
-
-def format_phone_number(phone):
-    logger.info(f"Original phone number: {phone}")
-    digits_only = re.sub(r'\D', '', phone)
-    
-    if digits_only.startswith('0'):
-        formatted = '+81' + digits_only[1:]
-    elif digits_only.startswith('81'):
-        formatted = '+' + digits_only
-    else:
-        formatted = '+81' + digits_only
-
-    if not re.match(r'^\+81[1-9]\d{9}$', formatted):
-        raise ValueError(f"Invalid phone number format after formatting: {formatted}")
-
-    logger.info(f"Formatted phone number: {formatted}")
-    return formatted
-
 
 agency_user_login_router = Blueprint('agency_user_login', __name__)
 

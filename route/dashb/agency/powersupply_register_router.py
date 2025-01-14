@@ -3,22 +3,13 @@ import logging
 import pymysql
 import os
 import datetime
-import random
 from response.response_base import create_success_response, create_error_response
 from db.db_connection import db
+from utils.db_utils import generate_unique_number
 
-# logger settings
+# ロガー設定
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-def generate_unique_number(cursor):
-    for _ in range(5):  # 5回まで試行
-        number = ''.join([str(random.randint(0, 9)) for _ in range(12)])
-        cursor.execute("SELECT COUNT(*) FROM m_powersupply WHERE app_powersupply_number = %s", (number,))
-        if cursor.fetchone()[0] == 0:
-            return number
-    # 5回試行しても重複する場合はエラーを発生させる
-    raise ValueError("ユニークな充電器番号の生成に失敗しました")
 
 powersupply_register_router = Blueprint('powersupply_register', __name__)
 
@@ -47,13 +38,13 @@ def powersupply_register():
             )), 400
 
         with db.get_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(pymysql.cursors.DictCursor) as cursor:
                 # 現在時刻を取得
                 now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 
                 # ユニークな12桁の数字を生成
                 try:
-                    app_powersupply_number = generate_unique_number(cursor)
+                    app_powersupply_number = generate_unique_number(cursor, 'm_powersupply', 'app_powersupply_number', 12)
                 except ValueError as e:
                     return jsonify(create_error_response(
                         str(e),

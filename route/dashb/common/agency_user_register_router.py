@@ -2,48 +2,23 @@ from flask import Blueprint, jsonify, request
 import logging
 import pymysql
 import os
-import datetime
-import random
-import boto3
-from botocore.exceptions import ClientError
-import re
 from response.response_base import create_success_response, create_error_response
 from db.db_connection import db
-
-# logger settings
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+import datetime
+import boto3
+from botocore.exceptions import ClientError
+from utils.db_utils import generate_unique_number
+from utils.utils import format_phone_number
 
 # Cognito設定
 COGNITO_USER_POOL_ID = os.environ['COGNITO_USER_POOL_ID']
 
+# ロガー設定
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 # Cognitoクライアントの初期化
 cognito_client = boto3.client('cognito-idp')
-
-def generate_unique_number(cursor, table, column, length):
-    for _ in range(5):  # 5回まで試行
-        number = ''.join([str(random.randint(0, 9)) for _ in range(length)])
-        cursor.execute(f"SELECT COUNT(*) as count FROM {table} WHERE {column} = %s", (number,))
-        if cursor.fetchone()['count'] == 0:
-            return number
-    raise ValueError(f"ユニークな{column}の生成に失敗しました")
-
-def format_phone_number(phone):
-    logger.info(f"元の電話番号: {phone}")
-    digits_only = re.sub(r'\D', '', phone)
-    
-    if digits_only.startswith('0'):
-        formatted = '+81' + digits_only[1:]
-    elif digits_only.startswith('81'):
-        formatted = '+' + digits_only
-    else:
-        formatted = '+81' + digits_only
-
-    if not re.match(r'^\+81[1-9]\d{9}$', formatted):
-        raise ValueError(f"不正な電話番号形式です: {formatted}")
-
-    logger.info(f"フォーマット後の電話番号: {formatted}")
-    return formatted
 
 def generate_ech_nav_code(cursor, agency_id):
     cursor.execute("""

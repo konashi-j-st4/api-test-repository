@@ -2,22 +2,13 @@ from flask import Blueprint, jsonify, request
 import logging
 import pymysql
 import datetime
-import random
 from response.response_base import create_success_response, create_error_response
 from db.db_connection import db
+from utils.db_utils import generate_unique_number
 
 # ロガー設定
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-def generate_unique_number(cursor, table, column, length):
-    for _ in range(5):  # 5回まで試行
-        number = ''.join([str(random.randint(0, 9)) for _ in range(length)])
-        cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE {column} = %s", (number,))
-        if cursor.fetchone()[0] == 0:
-            return number
-    # 5回試行しても重複する場合はエラーを発生させる
-    raise ValueError(f"Failed to generate a unique {column} after 5 attempts")
 
 agency_register_router = Blueprint('agency_register', __name__)
 
