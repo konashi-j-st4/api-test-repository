@@ -22,12 +22,12 @@ cognito_client = boto3.client('cognito-idp')
 
 def generate_ech_nav_code(cursor, corporate_id):
     cursor.execute("""
-    SELECT COUNT(*) + 1 
+    SELECT COUNT(*) + 1 as sequence_number
     FROM m_user u 
     JOIN m_user_corporate uc ON u.user_id = uc.user_id 
     WHERE uc.corporate_id = %s
     """, (corporate_id,))
-    sequence_number = cursor.fetchone()[0]
+    sequence_number = cursor.fetchone()['sequence_number']
     
     ech_nav_code = f"CORPEchNaviCD{corporate_id}{sequence_number:04d}"
     return ech_nav_code
