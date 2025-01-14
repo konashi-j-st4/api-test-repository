@@ -51,7 +51,7 @@ def agency_update_user():
                         "指定されたapp_user_numberに対応するユーザーが見つかりません",
                         None
                     )), 404
-                user_id = result[0]
+                user_id = result['user_id']
                 
                 # 現在時刻を取得
                 now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
