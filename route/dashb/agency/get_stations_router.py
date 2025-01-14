@@ -46,9 +46,9 @@ def get_stations():
             )), 400
 
         # 必須パラメータの確認
-        if 'userId' not in data or 'status' not in data:
+        if 'app_user_number' not in data or 'status' not in data:
             return jsonify(create_error_response(
-                "userIdとstatusは必須です",
+                "app_user_numberとstatusは必須です",
                 None
             )), 400
 
