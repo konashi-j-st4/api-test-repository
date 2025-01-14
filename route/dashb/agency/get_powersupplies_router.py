@@ -36,9 +36,9 @@ def get_powersupplies():
             )), 400
 
         # 必須パラメータの確認
-        if 'location_id' not in data or 'user_id' not in data:
+        if 'location_id' not in data or 'app_user_number' not in data:
             return jsonify(create_error_response(
-                "location_idとuser_idは必須です",
+                "location_idとapp_user_numberは必須です",
                 None
             )), 400
 

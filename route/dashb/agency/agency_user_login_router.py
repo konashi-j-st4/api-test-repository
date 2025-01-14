@@ -129,7 +129,7 @@ def agency_user_login():
                             return jsonify(create_success_response(
                                 "ログインに成功しました",
                                 {
-                                    "user_id": result['app_user_number'],
+                                    "app_user_number": result['app_user_number'],
                                     "accessToken": auth_response['AuthenticationResult']['AccessToken']
                                 }
                             )), 200

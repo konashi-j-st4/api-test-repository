@@ -286,7 +286,7 @@ def agency_user_sms():
                         
                         return jsonify(create_success_response(
                             "認証が完了しました",
-                            {"user_id": app_user_number}
+                            {"app_user_number": app_user_number}
                         )), 200
                     else:
                         return jsonify(create_error_response(

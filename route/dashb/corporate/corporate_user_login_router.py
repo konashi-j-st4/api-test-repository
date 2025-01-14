@@ -133,7 +133,7 @@ def corporate_user_login():
                 if result:
                     return jsonify(create_success_response(
                         "ログインに成功しました",
-                        {"user_id": result['app_user_number']}
+                        {"app_user_number": result['app_user_number']}
                     )), 200
                 else:
                     return jsonify(create_error_response(

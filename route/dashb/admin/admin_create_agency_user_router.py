@@ -54,7 +54,7 @@ def admin_create_agency_user():
                     WHERE user_id = %s
                     """
                     cursor.execute(update_query, (agency_id, user_id))
-                    logger.info(f"Updated record for user_id: {user_id}")
+                    logger.info(f"Updated record TO m_user_agency")
                 else:
                     # レコードが存在しない場合はINSERT
                     insert_query = """
@@ -62,11 +62,11 @@ def admin_create_agency_user():
                     VALUES (%s, %s, %s, %s)
                     """
                     cursor.execute(insert_query, (user_id, agency_id, 7, 'admin_user'))
-                    logger.info(f"Inserted new record for user_id: {user_id}")
+                    logger.info(f"Inserted new record TO m_user_agency")
 
                 return jsonify(create_success_response(
                     "User agency information updated successfully.",
-                    {"user_id": user_id, "agency_id": agency_id}
+                    {"app_user_number": app_user_number, "agency_id": agency_id}
                 )), 200
 
     except Exception as e:
