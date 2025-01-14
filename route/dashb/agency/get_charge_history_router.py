@@ -36,19 +36,20 @@ def get_charge_history():
 
         with db.get_connection() as conn:
             with conn.cursor(pymysql.cursors.DictCursor) as cursor:
-                # app_user_numberからuser_idを取得
-                user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
-                cursor.execute(user_id_query, (app_user_number,))
-                result = cursor.fetchone()
-                if not result:
-                    return jsonify(create_error_response(
-                        "指定されたapp_user_numberに対応するユーザーが見つかりません",
+                
+                # app_user_numberが存在し、powersupply_idsが未指定の場合にのみクエリを実行
+                if app_user_number and not powersupply_ids:
+                    # app_user_numberからuser_idを取得
+                    user_id_query = "SELECT user_id FROM m_user WHERE app_user_number = %s"
+                    cursor.execute(user_id_query, (app_user_number,))
+                    result = cursor.fetchone()
+                    if not result:
+                        return jsonify(create_error_response(
+                            "指定されたapp_user_numberに対応するユーザーが見つかりません",
                         None
                     )), 404
-                user_id = result['user_id']
-                
-                # user_idが存在し、powersupply_idsが未指定の場合にのみクエリを実行
-                if user_id and not powersupply_ids:
+                    user_id = result['user_id']
+                    
                     # まずユーザーの権限レベルを取得
                     permission_query = """
                     SELECT permission 
@@ -95,7 +96,6 @@ def get_charge_history():
                 SELECT
                     t_charge.transaction_id,
                     t_charge.powersupply_id,
-                    t_charge.user_id,
                     t_charge_history.charging_start,
                     t_charge_history.charging_end,
                     t_charge_history.charged_amount,

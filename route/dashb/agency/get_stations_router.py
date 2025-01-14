@@ -72,7 +72,6 @@ def get_stations():
                 # 実行クエリ
                 user_query = """
                 SELECT 
-                    a.app_user_number,
                     b.location_id,
                     b.station_name,
                     b.agency_id,
