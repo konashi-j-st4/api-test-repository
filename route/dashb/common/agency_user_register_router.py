@@ -8,7 +8,7 @@ import datetime
 import boto3
 from botocore.exceptions import ClientError
 from utils.db_utils import generate_unique_number
-from utils.utils import format_phone_number
+from utils.utils import format_phone_number, get_jst_now
 
 # Cognito設定
 COGNITO_USER_POOL_ID = os.environ['COGNITO_USER_POOL_ID']
@@ -20,17 +20,17 @@ logger.setLevel(logging.INFO)
 # Cognitoクライアントの初期化
 cognito_client = boto3.client('cognito-idp')
 
-def generate_ech_nav_code(cursor, agency_id):
-    cursor.execute("""
-    SELECT COUNT(*) + 1 as sequence_number
-    FROM m_user u 
-    JOIN m_user_agency uc ON u.user_id = uc.user_id 
-    WHERE uc.agency_id = %s
-    """, (agency_id,))
-    sequence_number = cursor.fetchone()['sequence_number']
+# def generate_ech_nav_code(cursor, agency_id):
+#     cursor.execute("""
+#     SELECT COUNT(*) + 1 as sequence_number
+#     FROM m_user u 
+#     JOIN m_user_agency uc ON u.user_id = uc.user_id 
+#     WHERE uc.agency_id = %s
+#     """, (agency_id,))
+#     sequence_number = cursor.fetchone()['sequence_number']
     
-    ech_nav_code = f"AGENEchNaviCD{agency_id}{sequence_number:04d}"
-    return ech_nav_code
+#     ech_nav_code = f"AGENEchNaviCD{agency_id}{sequence_number:04d}"
+#     return ech_nav_code
 
 def register_cognito_user(email, phone, lastName, firstName, ech_nav_code):
     try:
@@ -129,9 +129,9 @@ def agency_user_register():
                         )), 404
                     agency_id = result['agency_id']
 
-                now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                now = get_jst_now()
                 app_user_number = generate_unique_number(cursor, 'm_user', 'app_user_number', 10)
-                ech_nav_code = generate_ech_nav_code(cursor, agency_id)
+                ech_nav_code = "EchNavi" + "AGE" + app_user_number
 
                 # m_userテーブルにインサート
                 insert_user_query = """

@@ -5,6 +5,7 @@ import os
 import datetime
 from response.response_base import create_success_response, create_error_response
 from db.db_connection import db
+from utils.utils import get_jst_now
 
 # logger settings
 logger = logging.getLogger()
@@ -111,7 +112,7 @@ def station_register():
                 app_location_number = generate_app_location_number(cursor, agency_id)
 
                 # 現在時刻を取得
-                now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                now = get_jst_now()
 
                 # 実行クエリ
                 insert_query = """

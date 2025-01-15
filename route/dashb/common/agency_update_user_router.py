@@ -6,6 +6,7 @@ from response.response_base import create_success_response, create_error_respons
 from db.db_connection import db
 import boto3
 import datetime
+from utils.utils import get_jst_now
 
 # logger settings
 logger = logging.getLogger()
@@ -54,7 +55,7 @@ def agency_update_user():
                 user_id = result['user_id']
                 
                 # 現在時刻を取得
-                now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                now = get_jst_now()
                 
                 # m_user テーブルの更新
                 update_user_query = """

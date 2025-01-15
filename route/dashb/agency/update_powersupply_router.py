@@ -5,6 +5,7 @@ import os
 import datetime
 from response.response_base import create_success_response, create_error_response
 from db.db_connection import db
+from utils.utils import get_jst_now
 
 # logger settings
 logger = logging.getLogger()
@@ -51,7 +52,7 @@ def update_powersupply():
         with db.get_connection() as conn:
             with conn.cursor() as cursor:
                 # 現在時刻を取得
-                now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                now = get_jst_now()
                 
                 # 実行クエリ
                 update_query = """

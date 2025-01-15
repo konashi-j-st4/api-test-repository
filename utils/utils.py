@@ -6,9 +6,21 @@ import logging
 import hmac
 import base64
 import hashlib
+import datetime
+import pytz
 
 # ロガー設定
 logger = logging.getLogger(__name__)
+
+def get_jst_now():
+    """
+    現在の日本時間を取得します。
+
+    Returns:
+        str: 日本時間（YYYY-MM-DD HH:MM:SS形式）
+    """
+    jst = pytz.timezone('Asia/Tokyo')
+    return datetime.datetime.now(jst).strftime('%Y-%m-%d %H:%M:%S')
 
 def format_phone_number(phone):
     """
