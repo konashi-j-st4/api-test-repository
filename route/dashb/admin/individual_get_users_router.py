@@ -44,8 +44,6 @@ def individual_get_users():
                     cursor.execute(user_query)
 
                 result = cursor.fetchall()
-                logger.info(user_query)
-                logger.info(result)
 
                 if result:
                     return jsonify(create_success_response(

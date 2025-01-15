@@ -84,7 +84,6 @@ def get_unpaid_history():
 
                 powersupply_ids = [item['powersupply_id'] for item in powersupply_results]
                 placeholders = ', '.join(['%s'] * len(powersupply_ids))
-                logger.info(f"対象の充電器ID: {powersupply_ids}")
 
                 # 未払い取引を取得
                 unpaid_query = f"""

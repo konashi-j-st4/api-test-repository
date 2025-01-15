@@ -106,7 +106,6 @@ def station_register():
                     )), 404
 
                 agency_id = result['agency_id']
-                logger.info('企業IDの取得に成功しました')
 
                 # app_location_numberを生成
                 app_location_number = generate_app_location_number(cursor, agency_id)

@@ -71,8 +71,6 @@ def get_powersupplies():
                     )), 404
                 
                 user_permission = user_permission_result['permission']
-                logger.info(f"ユーザー権限: {user_permission}")
-
                 # 権限リストの生成
                 permissions = list(range(1, user_permission + 1))
                 

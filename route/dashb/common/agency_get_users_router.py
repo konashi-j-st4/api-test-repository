@@ -80,8 +80,7 @@ def agency_get_users():
                     cursor.execute(user_query, (user_id,))
 
                 result = cursor.fetchall() 
-                logger.info(f"クエリの実行に成功しました: {user_query}")
-                logger.info(f"クエリ結果: {result}")
+                logger.info(f"クエリの実行に成功しました")
 
                 return jsonify(create_success_response(
                     "ユーザー情報を取得しました。" if result else "ユーザー情報が存在しません。[E001]",

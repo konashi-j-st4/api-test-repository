@@ -65,8 +65,6 @@ def get_permission():
                 cursor.execute(permission_query)
                 result = cursor.fetchall()
                 
-                logger.info(f"クエリの実行に成功しました: {permission_query}")
-                logger.info(f"クエリ結果: {result}")
 
                 return jsonify(create_success_response(
                     "権限情報を取得しました。" if result else "権限情報が存在しません。[E001]",

@@ -23,8 +23,6 @@ def agency_get_companies():
                 """
                 cursor.execute(agency_query)
                 result = cursor.fetchall()
-                logger.info(agency_query)
-                logger.info(result)
 
                 if result:
                     return jsonify(create_success_response(

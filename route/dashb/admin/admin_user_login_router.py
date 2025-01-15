@@ -41,8 +41,6 @@ def admin_user_login():
                 """
                 cursor.execute(user_query, (app_user_number, password))
                 result = cursor.fetchone()
-                logger.info(user_query)
-                logger.info(result)
                 
                 if result:
                     return jsonify(create_success_response(

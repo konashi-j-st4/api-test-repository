@@ -35,7 +35,6 @@ def format_phone_number(phone):
     Raises:
         ValueError: 電話番号のフォーマットが不正な場合
     """
-    logger.info(f"元の電話番号: {phone}")
 
     # 数字以外の文字を削除
     digits_only = re.sub(r'\D', '', phone)
@@ -54,7 +53,7 @@ def format_phone_number(phone):
         logger.error(error_msg)
         raise ValueError(error_msg)
 
-    logger.info(f"フォーマット後の電話番号: {formatted}")
+    logger.info(f"電話番号のフォーマットが成功しました")
     return formatted 
 
 def calculate_secret_hash(username, client_id, client_secret):

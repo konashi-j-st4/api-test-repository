@@ -23,8 +23,6 @@ def corporate_get_companies():
                 """
                 cursor.execute(corporate_query)
                 result = cursor.fetchall()
-                logger.info(corporate_query)
-                logger.info(result)
 
                 if result:
                     return jsonify(create_success_response(
