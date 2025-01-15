@@ -57,7 +57,7 @@ def station_register():
 
         # 必須パラメータの確認
         required_fields = [
-            'user_id', 'station_name', 'zip_code', 'prefecture',
+            'app_user_number', 'station_name', 'zip_code', 'prefecture',
             'city', 'address', 'open_time', 'end_time', 'open_day'
         ]
         missing_fields = [field for field in required_fields if field not in data]
@@ -68,7 +68,7 @@ def station_register():
             )), 400
 
         # パラメータの取得
-        app_user_number = data['user_id']
+        app_user_number = data['app_user_number']
         station_name = data['station_name']
         zip_code = data['zip_code']
         prefecture = data['prefecture']

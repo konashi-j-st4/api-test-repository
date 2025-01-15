@@ -76,7 +76,7 @@ def corporate_user_login():
             phone_verified = next((attr['Value'] for attr in user_info['UserAttributes'] if attr['Name'] == 'phone_number_verified'), 'false')
             if phone_verified != 'true':
                 return jsonify(create_error_response(
-                    "電話番号が未認証です",
+                    "電話番号が未認証です。スマホアプリのechナビから認証を行ってください。",
                     None
                 )), 400
 
@@ -84,7 +84,7 @@ def corporate_user_login():
             logger.error(f"Cognito認証エラー: {str(e)}")
             if e.response['Error']['Code'] == 'NotAuthorizedException':
                 return jsonify(create_error_response(
-                    "電話番号またはパスワードが正しくありません[E001]",
+                    "電話番号またはパスワードが正しくありません",
                     None
                 )), 401
             return jsonify(create_error_response(
